@@ -83,6 +83,9 @@
 		<Unit filename="../exo9/ppm.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="dessinCube.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
