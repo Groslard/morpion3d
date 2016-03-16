@@ -8,29 +8,24 @@ float ecartCube=1.5;
 GLfloat    xAngle = 0.0, yAngle = 0.0, zAngle = 0.0;
 
 
-
 void init(void)
 {
-    glClearColor (0.0, 0.0, 0.0, 0.0);
+    glClearColor (0.0, 0.0, 1.0, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glLoadIdentity ();
-    gluLookAt (0.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-
+    gluLookAt (0.0, 0.0, -2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
-
 
 void my_timer(int v)
 {
-
     glutTimerFunc(40, my_timer, 1);
-
     glutPostRedisplay();
 }
+
 void rotateMorpion(char *direction)
 {
 // replacement au milieu
-
     if(direction=="UP")
     {
         yAngle=90.0;
@@ -51,17 +46,12 @@ void rotateMorpion(char *direction)
         xAngle=-90.0;
         glRotatef(xAngle, 0.0, 1.0, 0.0);
     }
-
-
-
-
 }
 
 void drawCube(float r, float g, float b)
 {
     glPushMatrix();
     glTranslatef(-0.5, -0.5, -0.5);
-
     glColor3f (r, g, b);
     // devant
     glBegin(GL_POLYGON);
@@ -113,9 +103,7 @@ void drawCube(float r, float g, float b)
     glEnd();
     glTranslatef(0.5, 0.5, 0.5);
     glPopMatrix();
-
 }
-
 
 
 void display(void)
@@ -160,11 +148,9 @@ void reshape (int w, int h)
     glViewport (0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
-    gluPerspective(120,w/h,0,5);
+    gluPerspective(120,w/h,1,20);
     glMatrixMode (GL_MODELVIEW);
 }
-
-
 
 //utilisation des fleches claviers
 void SpecialInput(int key, int x, int y)
@@ -184,7 +170,6 @@ void SpecialInput(int key, int x, int y)
         rotateMorpion("RIGHT");
         break;
     }
-
     glutPostRedisplay();
 }
 
@@ -196,13 +181,14 @@ void keyboard(unsigned char key, int x, int y)
         exit(0);
         break;
     }
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode (GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
-    glutInitWindowSize (300, 300);
+    glutInitWindowSize (500, 500);
     glutInitWindowPosition (100, 100);
     glutCreateWindow (argv[0]);
     init ();
@@ -210,7 +196,7 @@ int main(int argc, char** argv)
     glutReshapeFunc(reshape);
     glutSpecialFunc(SpecialInput);
     glutKeyboardFunc(keyboard);
-    glutTimerFunc(40, my_timer, 1);
+//    glutTimerFunc(40, my_timer, 1);
 
     glutMainLoop();
     return 0;

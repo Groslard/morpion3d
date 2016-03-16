@@ -8,7 +8,7 @@ $(EXEC):%: %.o
 	$(CC) -I$MESA_PATH/include -o $@ $^ $(FLAGS)
 
 %.o: %.c
-	$(CC) -o $@ -c $<
+	$(CC) -o $@ -c $< $(FLAGS)
 
 ##########
 
