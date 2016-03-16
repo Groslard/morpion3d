@@ -1,17 +1,16 @@
 CC      = gcc
-CFLAGS  = -Wall $(shell sdl-config --cflags)
-LDFLAGS = $(shell sdl-config --libs)
-EXEC=$(patsubst %.c, %, $(wildcard morpion*.c))
+FLAGS  = -L$MESA_PATH/lib -lGL -lGLU -lglut -L/usr/X11R6/lib -lX11
+EXEC=$(patsubst %.c, %, $(wildcard *.c))
 
 all: $(EXEC)
 
 $(EXEC):%: %.o
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CC) -I$MESA_PATH/include -o $@ $^ $(FLAGS)
 
 %.o: %.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(CC) -o $@ -c $<
 
-########## 
+##########
 
 .PHONY: clean
 clean:
