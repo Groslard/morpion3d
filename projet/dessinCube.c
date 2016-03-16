@@ -16,6 +16,7 @@ void init(void)
    glEnable(GL_DEPTH_TEST);
    glLoadIdentity ();
    gluLookAt (0.0, 0.0, -5.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+
 }
 
 
@@ -26,12 +27,26 @@ void my_timer(int v)
 
    glutPostRedisplay();
 }
-void rotateMorpion(){
-printf( "Press middle mouse button to rotate around Y axis\n" );
-yAngle+=180.0;
-   //glRotatef(xAngle, 0.1, 0.0, 0.0);
-      glRotatef(yAngle, 0.0, 0.1, 0.0);
-      //glRotatef(zAngle, 0.0, 0.0, 1.0);
+void rotateMorpion(char *direction){
+// replacement au milieu
+
+if(direction=="UP"){
+    yAngle=90.0;
+ glRotatef(yAngle, 0.0, 0.0, 1.0);
+}else if (direction=="DOWN"){
+yAngle=-90.0;
+ glRotatef(yAngle, 0.0, 0.0, 1.0);
+}else if (direction=="LEFT"){
+xAngle=90.0;
+ glRotatef(xAngle, 0.0, 1.0, 0.0);
+}else if (direction=="RIGHT"){
+xAngle=-90.0;
+ glRotatef(xAngle, 0.0, 1.0, 0.0);
+}
+
+
+
+
 }
 
 void drawCube(float r, float g, float b){
@@ -87,8 +102,9 @@ void drawCube(float r, float g, float b){
       glVertex3f (1, 1, 1);
       glVertex3f (1, 1, 0);
    glEnd();
-
+ glTranslatef(0.5, 0.5, 0.5);
    glPopMatrix();
+
 }
 
 
@@ -110,7 +126,7 @@ void display(void)
            glPushMatrix();
         for(xMorpion=0; xMorpion<3; xMorpion++){
             //colorie des cubes pour ce reperer lors de la translations
-               drawCube(zMorpion,xMorpion,yMorpion);
+               drawCube(xMorpion,yMorpion,zMorpion);
 //
 //        // translate profondeur
          glTranslatef(ecartCube, 0.0, 0.0);
@@ -121,8 +137,9 @@ void display(void)
      glPopMatrix();
       glTranslatef(0.0, 0.0, ecartCube);
    }
-
+ glTranslatef(ecartCube,0.0,0.0);
    glPopMatrix();
+
    glutSwapBuffers();
 }
 
@@ -131,7 +148,7 @@ void reshape (int w, int h)
    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();
-   glFrustum (-1.0, 1.0, -1.0, 1.0, 1.5, 20.0);
+  gluPerspective(120,w/h,0,5);
    glMatrixMode (GL_MODELVIEW);
 }
 
@@ -143,16 +160,16 @@ void SpecialInput(int key, int x, int y)
 switch(key)
 {
 case GLUT_KEY_UP:
-
+rotateMorpion("UP");
 break;
 case GLUT_KEY_DOWN:
-rotateMorpion();
+rotateMorpion("DOWN");
 break;
 case GLUT_KEY_LEFT:
-//do something here
+rotateMorpion("LEFT");
 break;
 case GLUT_KEY_RIGHT:
-//do something here
+rotateMorpion("RIGHT");
 break;
 }
 
