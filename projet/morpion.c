@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include "morpion.h"
 
+#include "ppm.c"
+
+
+// variables de texture
+
+static GLuint texName[1];
+GLubyte* data;
+int width, height;
+
 
 float zTranslate = -3.0;
 float ecartCube=1.5;
@@ -21,6 +30,9 @@ int nbFinishedFaces =0;
 
 void init(void)
 {
+
+
+
     glClearColor (0.0, 0.0, 1.0, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -28,6 +40,26 @@ void init(void)
     gluLookAt (0.0, 0.0, -3*ecartCube, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
+void initTexture(){
+	glClearColor (0, 0, 0, 0);
+   glEnable(GL_DEPTH_TEST);
+
+   data=glmReadPPM("rond.ppm", &width , &height); 
+   glGenTextures(1, texName);
+
+   glBindTexture(GL_TEXTURE_2D, texName[0]);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                   GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                   GL_NEAREST);
+   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
+                height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                data);
+
+   glEnable(GL_TEXTURE_2D);
+}
 void initPlayers(){
 
 }
@@ -65,6 +97,7 @@ void my_timer(int v)
 void rotateMorpion(char *direction)
 {
 // replacement au milieu
+
     if(direction=="UP")
     {
         yAngle=90.0;
@@ -86,47 +119,48 @@ void rotateMorpion(char *direction)
         glRotatef(xAngle, 0.0, 1.0, 0.0);
     }
 }
+/*
 void drawCouroneCube(float r, float g, float b){
 
 	glPushMatrix();
 	glTranslatef(ecartCube,ecartCube,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(ecartCube,-0.0,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);;
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(0.0,ecartCube,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(-ecartCube,ecartCube,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(-ecartCube,0.0,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(-ecartCube,-ecartCube,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(0.0,-ecartCube,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
 	glPushMatrix();
 	glTranslatef(ecartCube,-ecartCube,0.0);
-	drawCube(r,g,b);
+	drawCube(texName);
 	glPopMatrix();
-}
+}*/
 
 void drawMorpion(){
 
-	 int zMorpion, yMorpion, xMorpion;
-	//dession du cube central
-	drawCube(1.0,0.0,1.0);
+	
+/*	//dession du cube central
+	drawCube(texName);
 
 	//dessin de la courone autour du cube
 	drawCouroneCube(1.0,0.0,0.0);
@@ -134,18 +168,21 @@ void drawMorpion(){
 	//couronne eloigne
 	glPushMatrix();
 	glTranslatef(0.0,0.0,ecartCube);
-	drawCube(1.0,0.0,0.0);
+	drawCube(texName);
 	drawCouroneCube(1.0,0.0,0.0);
 	glPopMatrix();
 
 	// courone rapproche
 	glPushMatrix();
 	glTranslatef(0.0,0.0,-ecartCube);
-	drawCube(1.0,0.6,0.6);
+	drawCube(texName);
 	drawCouroneCube(1.0,0.6,0.6);
 	glPopMatrix();
+*/
 
-   /* glTranslatef(-ecartCube,-ecartCube,0.0);
+	 int zMorpion, yMorpion, xMorpion;
+ 
+    glPushMatrix();
 
     for(zMorpion=0; zMorpion<3; zMorpion++)
     {
@@ -155,12 +192,9 @@ void drawMorpion(){
             glPushMatrix();
             for(xMorpion=0; xMorpion<3; xMorpion++)
             {
-glPushMatrix();
-                //colorie des cubes pour ce reperer lors de la translations
-                drawCube(xMorpion,yMorpion,zMorpion);
-//
-//        // translate profondeur
- glPopMatrix();
+
+                //Maintenant on passe la texture en paramettre 
+                drawCube(texName);
                 glTranslatef(ecartCube, 0.0, 0.0);
             }
             glPopMatrix();
@@ -169,84 +203,89 @@ glPushMatrix();
         glPopMatrix();
         glTranslatef(0.0, 0.0, ecartCube);
     }
-    glTranslatef(ecartCube,ecartCube,0.0);*/
+     glPopMatrix();
+
 }
 
-void drawCube(float r, float g, float b)
+void drawCube(GLuint *texture)
 {
 
-    glPushMatrix();
-    glTranslatef(-0.5, -0.5, -0.5);
-    glColor3f (r, g, b);
-    // devant
-    glBegin(GL_POLYGON);
-    glVertex3f (0, 0, 0);
-    glVertex3f (1, 0, 0);
-    glVertex3f (1, 1, 0);
-    glVertex3f (0, 1, 0);
-    glEnd();
+	glPushMatrix();
+	glTranslatef(-0.5, -0.5, -0.5);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-    // arriere
-  glColor3f (r, g, b);
-    glBegin(GL_POLYGON);
-    glVertex3f (0, 0, 1);
-    glVertex3f (1, 0, 1);
-    glVertex3f (1, 1, 1);
-    glVertex3f (0, 1, 1);
-    glEnd();
+	// devant
 
-    // gauche
-  glColor3f (r, g, b);
-    glBegin(GL_POLYGON);
-    glVertex3f (0, 0, 0);
-    glVertex3f (0, 0, 1);
-    glVertex3f (0, 1, 1);
-    glVertex3f (0, 1, 0);
-    glEnd();
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f (0, 0, 0);
+	glTexCoord2f(0.0, 1.0);glVertex3f (1, 0, 0);
+	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 0);
+	glTexCoord2f(1.0, 0.0);glVertex3f (0, 1, 0);
+	glEnd();
 
-    //droite
-  glColor3f (r, g, b);
-    glBegin(GL_POLYGON);
-    glVertex3f (1, 0, 0);
-    glVertex3f (1, 0, 1);
-    glVertex3f (1, 1, 1);
-    glVertex3f (1, 1, 0);
-    glEnd();
+	// arriere
+	
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f (0, 0, 1);
+	glTexCoord2f(0.0, 1.0); glVertex3f (1, 0, 1);
+	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 1);
+	glTexCoord2f(1.0, 0.0); glVertex3f (0, 1, 1);
+	glEnd();
 
-    //dessous
-  glColor3f (r, g, b);
-    glBegin(GL_POLYGON);
-    glVertex3f (0, 0, 0);
-    glVertex3f (0, 0, 1);
-    glVertex3f (1, 0, 1);
-    glVertex3f (1, 0, 0);
-    glEnd();
+	// gauche
+	
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0);  glVertex3f (0, 0, 0);
+	glTexCoord2f(0.0, 1.0); glVertex3f (0, 0, 1);
+	glTexCoord2f(1.0, 1.0); glVertex3f (0, 1, 1);
+	glTexCoord2f(1.0, 0.0);glVertex3f (0, 1, 0);
+	glEnd();
 
-    //dessus
-  glColor3f (r, g, b);
-   
-    glBegin(GL_POLYGON);
-    glVertex3f (0, 1, 0);
-    glVertex3f (0, 1, 1);
-    glVertex3f (1, 1, 1);
-    glVertex3f (1, 1, 0);
-    glEnd();
-    glTranslatef(0.5, 0.5, 0.5);
-    glPopMatrix();
+	//droite
+	
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0);  glVertex3f (1, 0, 0);
+	glTexCoord2f(0.0, 1.0); glVertex3f (1, 0, 1);
+	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 1);
+	glTexCoord2f(1.0, 0.0); glVertex3f (1, 1, 0);
+	glEnd();
+
+	//dessous
+	
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0);  glVertex3f (0, 0, 0);
+	glTexCoord2f(0.0, 1.0); glVertex3f (0, 0, 1);
+	glTexCoord2f(1.0, 1.0); glVertex3f (1, 0, 1);
+	glTexCoord2f(1.0, 0.0); glVertex3f (1, 0, 0);
+	glEnd();
+
+	//dessus
+	
+
+	glBegin(GL_POLYGON);
+	glTexCoord2f(0.0, 0.0); glVertex3f (0, 1, 0);
+	glTexCoord2f(0.0, 1.0); glVertex3f (0, 1, 1);
+	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 1);
+	glTexCoord2f(1.0, 0.0);  glVertex3f (1, 1, 0);
+	glEnd();
+	glTranslatef(0.5, 0.5, 0.5);
+	glPopMatrix();
 }
 
 
 void display(void)
 {
+	
+	glClear (GL_COLOR_BUFFER_BIT);
+	glClear (GL_DEPTH_BUFFER_BIT);
 
-    glClear (GL_COLOR_BUFFER_BIT);
-    glClear (GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+	glTranslatef(-ecartCube,-ecartCube,-ecartCube);
+	drawMorpion();
+	glPopMatrix();
 
-    glPushMatrix();
-   drawMorpion();
-    glPopMatrix();
-
-    glutSwapBuffers();
+	glutSwapBuffers();
 }
 
 void reshape (int w, int h)
@@ -300,7 +339,9 @@ int main(int argc, char** argv)
     glutInitDisplayMode (GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
     glutInitWindowSize (500, 500);
     glutInitWindowPosition (100, 100);
+
     glutCreateWindow (argv[0]);
+	initTexture();
     init ();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
