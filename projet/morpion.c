@@ -25,7 +25,7 @@ void init(void)
     glClear (GL_COLOR_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glLoadIdentity ();
-    gluLookAt (0.0, 0.0, -2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt (0.0, 0.0, -3*ecartCube, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 void initPlayers(){
@@ -68,12 +68,12 @@ void rotateMorpion(char *direction)
     if(direction=="UP")
     {
         yAngle=90.0;
-        glRotatef(yAngle, 0.0, 0.0, 1.0);
+        glRotatef(yAngle, 1.0, 0.0, 0.0);
     }
     else if (direction=="DOWN")
     {
         yAngle=-90.0;
-        glRotatef(yAngle, 0.0, 0.0, 1.0);
+        glRotatef(yAngle, 1.0, 0.0, 0.0);
     }
     else if (direction=="LEFT")
     {
@@ -86,9 +86,95 @@ void rotateMorpion(char *direction)
         glRotatef(xAngle, 0.0, 1.0, 0.0);
     }
 }
+void drawCouroneCube(float r, float g, float b){
+
+	glPushMatrix();
+	glTranslatef(ecartCube,ecartCube,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(ecartCube,-0.0,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0.0,ecartCube,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-ecartCube,ecartCube,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-ecartCube,0.0,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-ecartCube,-ecartCube,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(0.0,-ecartCube,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(ecartCube,-ecartCube,0.0);
+	drawCube(r,g,b);
+	glPopMatrix();
+}
+
+void drawMorpion(){
+
+	 int zMorpion, yMorpion, xMorpion;
+	//dession du cube central
+	drawCube(1.0,0.0,1.0);
+
+	//dessin de la courone autour du cube
+	drawCouroneCube(1.0,0.0,0.0);
+
+	//couronne eloigne
+	glPushMatrix();
+	glTranslatef(0.0,0.0,ecartCube);
+	drawCube(1.0,0.0,0.0);
+	drawCouroneCube(1.0,0.0,0.0);
+	glPopMatrix();
+
+	// courone rapproche
+	glPushMatrix();
+	glTranslatef(0.0,0.0,-ecartCube);
+	drawCube(1.0,0.6,0.6);
+	drawCouroneCube(1.0,0.6,0.6);
+	glPopMatrix();
+
+   /* glTranslatef(-ecartCube,-ecartCube,0.0);
+
+    for(zMorpion=0; zMorpion<3; zMorpion++)
+    {
+        glPushMatrix();
+        for(yMorpion=0; yMorpion<3; yMorpion++)
+        {
+            glPushMatrix();
+            for(xMorpion=0; xMorpion<3; xMorpion++)
+            {
+glPushMatrix();
+                //colorie des cubes pour ce reperer lors de la translations
+                drawCube(xMorpion,yMorpion,zMorpion);
+//
+//        // translate profondeur
+ glPopMatrix();
+                glTranslatef(ecartCube, 0.0, 0.0);
+            }
+            glPopMatrix();
+            glTranslatef(0.0, ecartCube, 0.0);
+        }
+        glPopMatrix();
+        glTranslatef(0.0, 0.0, ecartCube);
+    }
+    glTranslatef(ecartCube,ecartCube,0.0);*/
+}
 
 void drawCube(float r, float g, float b)
 {
+
     glPushMatrix();
     glTranslatef(-0.5, -0.5, -0.5);
     glColor3f (r, g, b);
@@ -101,6 +187,7 @@ void drawCube(float r, float g, float b)
     glEnd();
 
     // arriere
+  glColor3f (r, g, b);
     glBegin(GL_POLYGON);
     glVertex3f (0, 0, 1);
     glVertex3f (1, 0, 1);
@@ -109,6 +196,7 @@ void drawCube(float r, float g, float b)
     glEnd();
 
     // gauche
+  glColor3f (r, g, b);
     glBegin(GL_POLYGON);
     glVertex3f (0, 0, 0);
     glVertex3f (0, 0, 1);
@@ -117,6 +205,7 @@ void drawCube(float r, float g, float b)
     glEnd();
 
     //droite
+  glColor3f (r, g, b);
     glBegin(GL_POLYGON);
     glVertex3f (1, 0, 0);
     glVertex3f (1, 0, 1);
@@ -125,6 +214,7 @@ void drawCube(float r, float g, float b)
     glEnd();
 
     //dessous
+  glColor3f (r, g, b);
     glBegin(GL_POLYGON);
     glVertex3f (0, 0, 0);
     glVertex3f (0, 0, 1);
@@ -133,7 +223,8 @@ void drawCube(float r, float g, float b)
     glEnd();
 
     //dessus
-    glColor3f (r, g, b);
+  glColor3f (r, g, b);
+   
     glBegin(GL_POLYGON);
     glVertex3f (0, 1, 0);
     glVertex3f (0, 1, 1);
@@ -152,31 +243,7 @@ void display(void)
     glClear (GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix();
-    int zMorpion, yMorpion, xMorpion;
-
-    glTranslatef(-ecartCube,-ecartCube,0.0);
-
-    for(zMorpion=0; zMorpion<3; zMorpion++)
-    {
-        glPushMatrix();
-        for(yMorpion=0; yMorpion<3; yMorpion++)
-        {
-            glPushMatrix();
-            for(xMorpion=0; xMorpion<3; xMorpion++)
-            {
-                //colorie des cubes pour ce reperer lors de la translations
-                drawCube(xMorpion,yMorpion,zMorpion);
-//
-//        // translate profondeur
-                glTranslatef(ecartCube, 0.0, 0.0);
-            }
-            glPopMatrix();
-            glTranslatef(0.0, ecartCube, 0.0);
-        }
-        glPopMatrix();
-        glTranslatef(0.0, 0.0, ecartCube);
-    }
-    glTranslatef(ecartCube,0.0,0.0);
+   drawMorpion();
     glPopMatrix();
 
     glutSwapBuffers();
