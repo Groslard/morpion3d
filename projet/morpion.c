@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "morpion.h"
-
+#include <math.h>  
 #include "ppm.c"
 
 
@@ -29,8 +29,9 @@ int nbFinishedFaces =0;
 
 int xrotate = 0;
 int yrotate = 0;
-
-
+int zrotate = 0;
+int nbYRotate=0;
+int nbXRotate=0;
 /**
 *
 *
@@ -203,6 +204,8 @@ void my_timer(int v)
     glutPostRedisplay();
 }
 
+
+
 void rotateMorpion(char *direction)
 {
 
@@ -213,29 +216,162 @@ void rotateMorpion(char *direction)
     **/
     if(direction=="UP")
     {
-        yrotate = yrotate - 90;
-        if (yrotate<0)
-        {
-            yrotate = 360 + yrotate;
-        }
+		nbYRotate+=1;
+		if((nbXRotate%4)==-1||(nbXRotate%4)==3){
 
-    }
+		//cas un deplacement a doirte a partir de l'initial
+			
+				zrotate = zrotate + 90;
+		    	if (zrotate<0)
+		    	{
+		        	zrotate = 360 - zrotate;
+		    	}
+			
+			
+		}
+		else if((nbXRotate%4)==-3||(nbXRotate%4)==1){
+
+		//cas un deplacement a doirte a partir de l'initial
+		
+			zrotate = zrotate - 90;
+		    if (zrotate<0)
+		    {
+		        zrotate = 360 + zrotate;
+		    }
+		
+			
+		}
+		else if((nbXRotate%4)==-2||(nbXRotate%4)==2){
+		
+		//cas deux deplacement en y gauche ou droite
+		    yrotate = yrotate - 90;
+		    if (yrotate<0)
+		    {
+		        yrotate = 360 + yrotate;
+		    }
+	
+		}
+		else if((nbXRotate%4)==0){
+		
+		//cas de base pas de rotation en y
+		    yrotate = yrotate + 90;
+		    if (yrotate<0)
+		    {
+		        yrotate = 360 + yrotate;
+		    }
+	
+		}
+	}
+
     else if (direction=="DOWN")
-    {
-        yrotate = (yrotate + 90)%360;
+	{
+		nbYRotate-=1;
+		if((nbXRotate%4)==-1||(nbXRotate%4)==3){
 
-    }
+			//cas un deplacement a doirte a partir de l'initial
+			zrotate = (zrotate - 90)%360;
+		}
+		else if((nbXRotate%4)==-3||(nbXRotate%4)==1){
+
+			//cas un deplacement a doirte a partir de l'initial
+			zrotate = (zrotate + 90)%360;
+		}
+		else if((nbXRotate%4)==-2||(nbXRotate%4)==2){
+
+			//cas deux deplacement en y gauche ou droite
+			yrotate = (yrotate + 90)%360;
+
+		}
+		else if((nbXRotate%4)==0){
+
+			//cas de base pas de rotation en y
+			yrotate = (yrotate - 90)%360;
+
+		}
+
+	
+
+   }
     else if (direction=="LEFT")
     {
-        xrotate = (xrotate + 90)%360;
+		nbXRotate-=1;
+ 
+
+		if((nbYRotate%4)==-1||(nbYRotate%4)==3){
+
+			//cas un deplacement a doirte a partir de l'initial
+			yrotate = (yrotate - 90)%360;
+		}
+		else if((nbYRotate%4)==-3||(nbYRotate%4)==1){
+
+			//cas un deplacement a doirte a partir de l'initial
+			yrotate = (yrotate + 90)%360;
+		}
+		else if((nbYRotate%4)==-2||(nbYRotate%4)==2){
+
+
+			//cas deux deplacement en y gauche ou droite
+			 xrotate = (xrotate - 90)%360;
+
+		}
+		else if((nbYRotate%4)==0){
+
+			//cas de base pas de rotation en X
+			 xrotate = (xrotate + 90)%360;
+
+		}
+
+
+
+
+		
+       
     }
+///////////////////////
     else if (direction=="RIGHT")
     {
-        xrotate = xrotate - 90;
-        if (xrotate<0)
-        {
-            xrotate = 360 + xrotate;
-        }
+		nbXRotate+=1;
+		if((nbYRotate%4)==-1||(nbYRotate%4)==3){
+
+			//cas un deplacement a doirte a partir de l'initial
+			yrotate = yrotate + 90;
+		    if (yrotate<0)
+		    {
+		        yrotate = 360 - yrotate;
+		    }
+		}
+		else if((nbYRotate%4)==-3||(nbYRotate%4)==1){
+
+			//cas un deplacement a doirte a partir de l'initial
+			yrotate = yrotate - 90;
+		    if (yrotate<0)
+		    {
+		        yrotate = 360 + yrotate;
+		    }
+		}
+		else if((nbYRotate%4)==-2||(nbYRotate%4)==2){
+
+			//cas deux deplacement en y gauche ou droite
+			xrotate = xrotate + 90;
+        	if (xrotate<0)
+       		{
+            	xrotate = 360 - xrotate;
+        	}
+
+		}
+		else if((nbYRotate%4)==0){
+
+			//cas de base pas de rotation en X
+			xrotate = xrotate - 90;
+        	if (xrotate<0)
+       		{
+            	xrotate = 360 + xrotate;
+        	}
+
+		}
+
+		
+       
 
     }
 }
@@ -383,6 +519,7 @@ void display(void)
     glPushMatrix();
     glRotatef(xrotate, 0.0, 1.0, 0.0);
     glRotatef(yrotate, 1.0, 0.0, 0.0);
+	glRotatef(zrotate, 0.0, 0.0, 1.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
 
     drawMorpion();
