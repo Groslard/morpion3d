@@ -33,9 +33,9 @@ typedef struct Face Face;
 struct Face
 {
     Cube* cubes[9];
-    int upFaceId;
-    int downFaceId;
-    int leftFaceId;
-    int rightFaceId;
+    Face* upFace;
+    Face* downFace;
+    Face* leftFace;
+    Face* rightFace;
     Player* winner;
 };

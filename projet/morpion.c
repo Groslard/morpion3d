@@ -85,17 +85,64 @@ void initTextures()
 
 void initFaces()
 {
-    faces[0].cubes[0] = &cubes[0][0][0];
-    faces[0].cubes[1] = &cubes[1][0][0];
-    faces[0].cubes[2] = &cubes[2][0][0];
-    faces[0].cubes[3] = &cubes[0][1][0];
-    faces[0].cubes[4] = &cubes[1][1][0];
-    faces[0].cubes[5] = &cubes[2][1][0];
-    faces[0].cubes[6] = &cubes[0][2][0];
-    faces[0].cubes[7] = &cubes[1][2][0];
-    faces[0].cubes[8] = &cubes[2][2][0];
-    currentFace = &faces[0];
+    int l, c;
+    int i=0;
 
+    for (l=0; l<3; l++){
+        for (c=0; c<3; c++){
+            // devant
+            faces[0].cubes[i]=&cubes[c][l][0];
+            // dessus
+            faces[1].cubes[i]=&cubes[c][2][l];
+            // derriere
+            faces[2].cubes[i]=&cubes[c][2-l][2];
+            // dessous
+            faces[3].cubes[i]=&cubes[c][0][2-l];
+            // gauche
+            faces[4].cubes[i]=&cubes[0][l][2-c];
+            // droite
+            faces[5].cubes[i]=&cubes[2][l][c];
+            i++;
+        }
+    }
+
+    // devant
+    faces[0].upFace = &faces[1];
+    faces[0].downFace = &faces[3];
+    faces[0].leftFace = &faces[4];
+    faces[0].rightFace = &faces[5];
+
+    // dessus
+    faces[1].upFace = &faces[2];
+    faces[1].downFace = &faces[0];
+    faces[1].leftFace = &faces[4];
+    faces[1].rightFace = &faces[5];
+
+    // derriere
+    faces[2].upFace = &faces[3];
+    faces[2].downFace = &faces[1];
+    faces[2].leftFace = &faces[4];
+    faces[2].rightFace = &faces[5];
+
+    // dessous
+    faces[3].upFace = &faces[0];
+    faces[3].downFace = &faces[2];
+    faces[3].leftFace = &faces[4];
+    faces[3].rightFace = &faces[5];
+
+    // gauche
+    faces[4].upFace = &faces[1];
+    faces[4].downFace = &faces[3];
+    faces[4].leftFace = &faces[2];
+    faces[4].rightFace = &faces[0];
+
+    // droite
+    faces[5].upFace = &faces[1];
+    faces[5].downFace = &faces[3];
+    faces[5].leftFace = &faces[0];
+    faces[5].rightFace = &faces[2];
+
+    currentFace = &faces[0];
 }
 
 void init(void)
@@ -368,19 +415,19 @@ void SpecialInput(int key, int x, int y)
     {
     case GLUT_KEY_UP:
         rotateMorpion("UP");
-        // currentFace = faces[currentFace.upFaceId];
+        currentFace = currentFace->upFace;
         break;
     case GLUT_KEY_DOWN:
         rotateMorpion("DOWN");
-        // currentFace = faces[currentFace.downFaceId];
+        currentFace = currentFace->downFace;
         break;
     case GLUT_KEY_LEFT:
         rotateMorpion("LEFT");
-        // currentFace = faces[currentFace.leftFaceId];
+        currentFace = currentFace->leftFace;
         break;
     case GLUT_KEY_RIGHT:
         rotateMorpion("RIGHT");
-        // currentFace = faces[currentFace.rightFaceId];
+        currentFace = currentFace->rightFace;
         break;
     }
     glutPostRedisplay();
