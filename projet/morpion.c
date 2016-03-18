@@ -27,6 +27,8 @@ Cube cubes[3][3][3];
 
 int nbFinishedFaces =0;
 
+int xrotate = 0;
+int yrotate = 0;
 
 
 /**
@@ -83,6 +85,16 @@ void initTextures()
 
 void initFaces()
 {
+    faces[0].cubes[0] = &cubes[0][0][0];
+    faces[0].cubes[1] = &cubes[1][0][0];
+    faces[0].cubes[2] = &cubes[2][0][0];
+    faces[0].cubes[3] = &cubes[0][1][0];
+    faces[0].cubes[4] = &cubes[1][1][0];
+    faces[0].cubes[5] = &cubes[2][1][0];
+    faces[0].cubes[6] = &cubes[0][2][0];
+    faces[0].cubes[7] = &cubes[1][2][0];
+    faces[0].cubes[8] = &cubes[2][2][0];
+    currentFace = &faces[0];
 
 }
 
@@ -154,23 +166,30 @@ void rotateMorpion(char *direction)
     **/
     if(direction=="UP")
     {
-        yAngle=90.0;
-        glRotatef(yAngle, 1.0, 0.0, 0.0);
+        yrotate = yrotate - 90;
+        if (yrotate<0)
+        {
+            yrotate = 360 + yrotate;
+        }
+
     }
     else if (direction=="DOWN")
     {
-        yAngle=-90.0;
-        glRotatef(yAngle, 1.0, 0.0, 0.0);
+        yrotate = (yrotate + 90)%360;
+
     }
     else if (direction=="LEFT")
     {
-        xAngle=90.0;
-        glRotatef(xAngle, 0.0, 1.0, 0.0);
+        xrotate = (xrotate + 90)%360;
     }
     else if (direction=="RIGHT")
     {
-        xAngle=-90.0;
-        glRotatef(xAngle, 0.0, 1.0, 0.0);
+        xrotate = xrotate - 90;
+        if (xrotate<0)
+        {
+            xrotate = 360 + xrotate;
+        }
+
     }
 }
 
@@ -271,6 +290,7 @@ void drawMorpion()
 
     glPushMatrix();
 
+
     for(zMorpion=0; zMorpion<3; zMorpion++)
     {
         glPushMatrix();
@@ -288,7 +308,7 @@ void drawMorpion()
                 {
                     drawCube(cubePlayer->texture);
                 }
-                glTranslatef(ecartCube, 0.0, 0.0);
+                glTranslatef(-ecartCube, 0.0, 0.0);
             }
             glPopMatrix();
             glTranslatef(0.0, ecartCube, 0.0);
@@ -314,7 +334,10 @@ void display(void)
     glClear (GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix();
-    glTranslatef(-ecartCube,-ecartCube,-ecartCube);
+    glRotatef(xrotate, 0.0, 1.0, 0.0);
+    glRotatef(yrotate, 1.0, 0.0, 0.0);
+    glTranslatef(ecartCube,-ecartCube,-ecartCube);
+
     drawMorpion();
     glPopMatrix();
 
@@ -367,6 +390,33 @@ void keyboard(unsigned char key, int x, int y)
 {
     switch (key)
     {
+    case '1':
+        currentFace->cubes[0]->player = currentPlayer;
+        break;
+    case '2':
+        currentFace->cubes[1]->player = currentPlayer;
+        break;
+    case '3':
+        currentFace->cubes[2]->player = currentPlayer;
+        break;
+    case '4':
+        currentFace->cubes[3]->player = currentPlayer;
+        break;
+    case '5':
+        currentFace->cubes[4]->player = currentPlayer;
+        break;
+    case '6':
+        currentFace->cubes[5]->player = currentPlayer;
+        break;
+    case '7':
+        currentFace->cubes[6]->player = currentPlayer;
+        break;
+    case '8':
+        currentFace->cubes[7]->player = currentPlayer;
+        break;
+    case '9':
+        currentFace->cubes[8]->player = currentPlayer;
+        break;
     case 27:
         exit(0);
         break;
