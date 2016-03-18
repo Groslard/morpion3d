@@ -7,10 +7,10 @@
 
 
 // variables de texture
-
-static GLuint texName[1];
 GLubyte* data;
 int width, height;
+
+GLuint defaultTexture;
 
 
 float zTranslate = -3.0;
@@ -28,10 +28,69 @@ Cube cubes[3][3][3];
 int nbFinishedFaces =0;
 
 
-void init(void)
+
+/**
+*
+*
+*GAME INITIALISATION
+*
+*
+***/
+void initPlayers()
+{
+    players[0].pathTexture = CROIX;
+    players[0].name = "Player 1";
+    players[0].pts = 0;
+
+    players[1].pathTexture = ROND;
+    players[1].name = "Player 2";
+    players[1].pts = 0;
+
+    currentPlayer = &players[0];
+}
+
+GLuint createTexture(char* texPath)
+{
+    GLuint texNames[1];
+    data=glmReadPPM(texPath, &width , &height);
+    glGenTextures(1, texNames);
+
+    glBindTexture(GL_TEXTURE_2D, texNames[0]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+                    GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
+                 height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+                 data);
+
+    glEnable(GL_TEXTURE_2D);
+    return texNames[0];
+}
+
+void initTextures()
+{
+    glClearColor (0, 0, 0, 0);
+    glEnable(GL_DEPTH_TEST);
+
+    // TODO : remplacer les 0,1,2 par une variable qu on incremente dans la fonction ?
+    defaultTexture = createTexture(DEFAULT);
+    players[0].texture = createTexture(ROND);
+    players[0].texture = createTexture(CROIX);
+}
+
+void initFaces()
 {
 
+}
 
+void init(void)
+{
+    initPlayers();
+    initTextures();
+    initFaces();
 
     glClearColor (0.0, 0.0, 1.0, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
@@ -40,53 +99,44 @@ void init(void)
     gluLookAt (0.0, 0.0, -3*ecartCube, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
-void initTexture(){
-	glClearColor (0, 0, 0, 0);
-   glEnable(GL_DEPTH_TEST);
 
-   data=glmReadPPM("rond.ppm", &width , &height); 
-   glGenTextures(1, texName);
 
-   glBindTexture(GL_TEXTURE_2D, texName[0]);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                   GL_NEAREST);
-   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                   GL_NEAREST);
-   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width,
-                height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-                data);
+/**
+*
+*
+*GAME ALGORITHM
+*
+*
+***/
 
-   glEnable(GL_TEXTURE_2D);
-}
-void initPlayers(){
-
-}
-
-void initCubes(){
-}
-
-void initFaces(){
-
-}
-
-void testFaceFinished(Face face){
+void testFaceFinished(Face face)
+{
     // Si tous les cubes de la current face sont joués:
     nbFinishedFaces = nbFinishedFaces + 1;
 }
 
-void testFaceWon(Face face){
+void testFaceWon(Face face)
+{
     // si la face n a pas encore de winner , on regarde si il y a une combinaison gagnante.
     // Si oui, on set le joueur actif comme winner, et on incremente les pts du joueur.
 }
 
-void testGameFinished(){
+void testGameFinished()
+{
     // Si players[0].pts == 3 && players[1].pts == 3    EGALITE
     // Si players[0].pts > players[1].pts   PLAYERS 1 GAGNE
     // Si players[0].pts < players[1].pts   PLAYERS 2 GAGNE
     // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
 }
+
+
+/***
+*
+*
+* DRAW FUNCTIONS
+*
+*
+***/
 
 void my_timer(int v)
 {
@@ -96,8 +146,12 @@ void my_timer(int v)
 
 void rotateMorpion(char *direction)
 {
-// replacement au milieu
 
+    /**
+    * TODO : au lieu de faire un glrotate, tu memorise de cb faut rotate, et tu fais appel au timer
+    * C est donc le timer qui va se rappeler n fois jusqu a ce que le cube soit rotate comme il faut
+    * il faut donc utiliser   glutTimerFunc(40, my_timer, 1) apres avoir initialisé les variables de rotation
+    **/
     if(direction=="UP")
     {
         yAngle=90.0;
@@ -119,69 +173,102 @@ void rotateMorpion(char *direction)
         glRotatef(xAngle, 0.0, 1.0, 0.0);
     }
 }
-/*
-void drawCouroneCube(float r, float g, float b){
 
-	glPushMatrix();
-	glTranslatef(ecartCube,ecartCube,0.0);
-	drawCube(texName);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(ecartCube,-0.0,0.0);
-	drawCube(texName);;
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(0.0,ecartCube,0.0);
-	drawCube(texName);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-ecartCube,ecartCube,0.0);
-	drawCube(texName);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-ecartCube,0.0,0.0);
-	drawCube(texName);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(-ecartCube,-ecartCube,0.0);
-	drawCube(texName);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(0.0,-ecartCube,0.0);
-	drawCube(texName);
-	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(ecartCube,-ecartCube,0.0);
-	drawCube(texName);
-	glPopMatrix();
-}*/
+void drawCube(GLuint texName)
+{
 
-void drawMorpion(){
+    glPushMatrix();
+    glTranslatef(-0.5, -0.5, -0.5);
+    glBindTexture(GL_TEXTURE_2D, texName);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	
-/*	//dession du cube central
-	drawCube(texName);
+    // devant
 
-	//dessin de la courone autour du cube
-	drawCouroneCube(1.0,0.0,0.0);
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (0, 0, 0);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (1, 0, 0);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f (1, 1, 0);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f (0, 1, 0);
+    glEnd();
 
-	//couronne eloigne
-	glPushMatrix();
-	glTranslatef(0.0,0.0,ecartCube);
-	drawCube(texName);
-	drawCouroneCube(1.0,0.0,0.0);
-	glPopMatrix();
+    // arriere
 
-	// courone rapproche
-	glPushMatrix();
-	glTranslatef(0.0,0.0,-ecartCube);
-	drawCube(texName);
-	drawCouroneCube(1.0,0.6,0.6);
-	glPopMatrix();
-*/
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (0, 0, 1);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (1, 0, 1);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f (1, 1, 1);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f (0, 1, 1);
+    glEnd();
 
-	 int zMorpion, yMorpion, xMorpion;
- 
+    // gauche
+
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (0, 0, 0);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (0, 0, 1);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f (0, 1, 1);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f (0, 1, 0);
+    glEnd();
+
+    //droite
+
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (1, 0, 0);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (1, 0, 1);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f (1, 1, 1);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f (1, 1, 0);
+    glEnd();
+
+    //dessous
+
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (0, 0, 0);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (0, 0, 1);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f (1, 0, 1);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f (1, 0, 0);
+    glEnd();
+
+    //dessus
+
+
+    glBegin(GL_POLYGON);
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (0, 1, 0);
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (0, 1, 1);
+    glTexCoord2f(1.0, 1.0);
+    glVertex3f (1, 1, 1);
+    glTexCoord2f(1.0, 0.0);
+    glVertex3f (1, 1, 0);
+    glEnd();
+    glTranslatef(0.5, 0.5, 0.5);
+    glPopMatrix();
+}
+
+void drawMorpion()
+{
+
+    int zMorpion, yMorpion, xMorpion;
+
     glPushMatrix();
 
     for(zMorpion=0; zMorpion<3; zMorpion++)
@@ -192,9 +279,15 @@ void drawMorpion(){
             glPushMatrix();
             for(xMorpion=0; xMorpion<3; xMorpion++)
             {
-
-                //Maintenant on passe la texture en paramettre 
-                drawCube(texName);
+                Player* cubePlayer = cubes[xMorpion][yMorpion][zMorpion].player;
+                if(cubePlayer == NULL)
+                {
+                    drawCube(defaultTexture);
+                }
+                else
+                {
+                    drawCube(cubePlayer->texture);
+                }
                 glTranslatef(ecartCube, 0.0, 0.0);
             }
             glPopMatrix();
@@ -203,89 +296,29 @@ void drawMorpion(){
         glPopMatrix();
         glTranslatef(0.0, 0.0, ecartCube);
     }
-     glPopMatrix();
-
+    glPopMatrix();
 }
 
-void drawCube(GLuint *texture)
-{
-
-	glPushMatrix();
-	glTranslatef(-0.5, -0.5, -0.5);
-	glBindTexture(GL_TEXTURE_2D, texture[0]);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
-	// devant
-
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0); glVertex3f (0, 0, 0);
-	glTexCoord2f(0.0, 1.0);glVertex3f (1, 0, 0);
-	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 0);
-	glTexCoord2f(1.0, 0.0);glVertex3f (0, 1, 0);
-	glEnd();
-
-	// arriere
-	
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0); glVertex3f (0, 0, 1);
-	glTexCoord2f(0.0, 1.0); glVertex3f (1, 0, 1);
-	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 1);
-	glTexCoord2f(1.0, 0.0); glVertex3f (0, 1, 1);
-	glEnd();
-
-	// gauche
-	
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0);  glVertex3f (0, 0, 0);
-	glTexCoord2f(0.0, 1.0); glVertex3f (0, 0, 1);
-	glTexCoord2f(1.0, 1.0); glVertex3f (0, 1, 1);
-	glTexCoord2f(1.0, 0.0);glVertex3f (0, 1, 0);
-	glEnd();
-
-	//droite
-	
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0);  glVertex3f (1, 0, 0);
-	glTexCoord2f(0.0, 1.0); glVertex3f (1, 0, 1);
-	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 1);
-	glTexCoord2f(1.0, 0.0); glVertex3f (1, 1, 0);
-	glEnd();
-
-	//dessous
-	
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0);  glVertex3f (0, 0, 0);
-	glTexCoord2f(0.0, 1.0); glVertex3f (0, 0, 1);
-	glTexCoord2f(1.0, 1.0); glVertex3f (1, 0, 1);
-	glTexCoord2f(1.0, 0.0); glVertex3f (1, 0, 0);
-	glEnd();
-
-	//dessus
-	
-
-	glBegin(GL_POLYGON);
-	glTexCoord2f(0.0, 0.0); glVertex3f (0, 1, 0);
-	glTexCoord2f(0.0, 1.0); glVertex3f (0, 1, 1);
-	glTexCoord2f(1.0, 1.0); glVertex3f (1, 1, 1);
-	glTexCoord2f(1.0, 0.0);  glVertex3f (1, 1, 0);
-	glEnd();
-	glTranslatef(0.5, 0.5, 0.5);
-	glPopMatrix();
-}
-
+/***
+*
+*
+* GL FUNCTIONS
+*
+*
+***/
 
 void display(void)
 {
-	
-	glClear (GL_COLOR_BUFFER_BIT);
-	glClear (GL_DEPTH_BUFFER_BIT);
 
-	glPushMatrix();
-	glTranslatef(-ecartCube,-ecartCube,-ecartCube);
-	drawMorpion();
-	glPopMatrix();
+    glClear (GL_COLOR_BUFFER_BIT);
+    glClear (GL_DEPTH_BUFFER_BIT);
 
-	glutSwapBuffers();
+    glPushMatrix();
+    glTranslatef(-ecartCube,-ecartCube,-ecartCube);
+    drawMorpion();
+    glPopMatrix();
+
+    glutSwapBuffers();
 }
 
 void reshape (int w, int h)
@@ -297,7 +330,15 @@ void reshape (int w, int h)
     glMatrixMode (GL_MODELVIEW);
 }
 
-//utilisation des fleches claviers
+
+/***
+*
+*
+* KEYBOARD FUNCTIONS
+*
+*
+***/
+
 void SpecialInput(int key, int x, int y)
 {
     switch(key)
@@ -333,6 +374,15 @@ void keyboard(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
+
+
+/***
+*
+*
+* MAIN FUNCTION
+*
+*
+***/
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
@@ -341,13 +391,11 @@ int main(int argc, char** argv)
     glutInitWindowPosition (100, 100);
 
     glutCreateWindow (argv[0]);
-	initTexture();
     init ();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutSpecialFunc(SpecialInput);
     glutKeyboardFunc(keyboard);
-//    glutTimerFunc(40, my_timer, 1);
 
     glutMainLoop();
     return 0;
