@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "morpion.h"
-#include <math.h>  
+#include <math.h>
 #include "ppm.c"
 
 
@@ -30,8 +30,16 @@ int nbFinishedFaces =0;
 int xrotate = 0;
 int yrotate = 0;
 int zrotate = 0;
-int nbYRotate=0;
-int nbXRotate=0;
+
+int nbXrotate = 0;
+int nbYrotate = 0;
+
+int* currentX = &xrotate;
+int* currentY = &yrotate;
+int* unusedAxe = &zrotate;
+
+int* temp;
+
 /**
 *
 *
@@ -89,8 +97,10 @@ void initFaces()
     int l, c;
     int i=0;
 
-    for (l=0; l<3; l++){
-        for (c=0; c<3; c++){
+    for (l=0; l<3; l++)
+    {
+        for (c=0; c<3; c++)
+        {
             // devant
             faces[0].cubes[i]=&cubes[c][l][0];
             // dessus
@@ -204,7 +214,23 @@ void my_timer(int v)
     glutPostRedisplay();
 }
 
+void updateAxe(int* axe, int sens, int* rotateCount){
 
+    if(axe == &zrotate){
+    sens = -sens;
+    }
+    *axe = sens*90;
+    *rotateCount = (*rotateCount + sens)%4;
+    if(*rotateCount < 0){
+        *rotateCount = 3;
+    }
+
+    glRotatef(xrotate, 0.0, 1.0, 0.0);
+    glRotatef(yrotate, 1.0, 0.0, 0.0);
+    glRotatef(zrotate, 0.0, 0.0, 1.0);
+
+    *axe = 0;
+}
 
 void rotateMorpion(char *direction)
 {
@@ -214,166 +240,50 @@ void rotateMorpion(char *direction)
     * C est donc le timer qui va se rappeler n fois jusqu a ce que le cube soit rotate comme il faut
     * il faut donc utiliser   glutTimerFunc(40, my_timer, 1) apres avoir initialisé les variables de rotation
     **/
+
+
+
+    int inverse =1;
+
+    if((direction =="UP" || direction=="DOWN") && ((nbXrotate>1 && currentY != &zrotate) || (nbXrotate<2 && currentY == &zrotate))) {
+        inverse =1;
+        printf("coucou");
+    }else if((direction =="LEFT" || direction=="RIGHT") && ((nbXrotate>1 && currentY != &zrotate) || (nbXrotate<2 && currentY == &zrotate))){
+        inverse =1;
+        printf("coucou");
+    }
+
     if(direction=="UP")
     {
-		nbYRotate+=1;
-		if((nbXRotate%4)==-1||(nbXRotate%4)==3){
-
-		//cas un deplacement a doirte a partir de l'initial
-			
-				zrotate = zrotate + 90;
-		    	if (zrotate<0)
-		    	{
-		        	zrotate = 360 - zrotate;
-		    	}
-			
-			
-		}
-		else if((nbXRotate%4)==-3||(nbXRotate%4)==1){
-
-		//cas un deplacement a doirte a partir de l'initial
-		
-			zrotate = zrotate - 90;
-		    if (zrotate<0)
-		    {
-		        zrotate = 360 + zrotate;
-		    }
-		
-			
-		}
-		else if((nbXRotate%4)==-2||(nbXRotate%4)==2){
-		
-		//cas deux deplacement en y gauche ou droite
-		    yrotate = yrotate - 90;
-		    if (yrotate<0)
-		    {
-		        yrotate = 360 + yrotate;
-		    }
-	
-		}
-		else if((nbXRotate%4)==0){
-		
-		//cas de base pas de rotation en y
-		    yrotate = yrotate + 90;
-		    if (yrotate<0)
-		    {
-		        yrotate = 360 + yrotate;
-		    }
-	
-		}
-	}
+        updateAxe(currentY, -inverse, &nbYrotate);
+        temp = currentX;
+        currentX = unusedAxe;
+        unusedAxe = temp;
+    }
 
     else if (direction=="DOWN")
-	{
-		nbYRotate-=1;
-		if((nbXRotate%4)==-1||(nbXRotate%4)==3){
-
-			//cas un deplacement a doirte a partir de l'initial
-			zrotate = (zrotate - 90)%360;
-		}
-		else if((nbXRotate%4)==-3||(nbXRotate%4)==1){
-
-			//cas un deplacement a doirte a partir de l'initial
-			zrotate = (zrotate + 90)%360;
-		}
-		else if((nbXRotate%4)==-2||(nbXRotate%4)==2){
-
-			//cas deux deplacement en y gauche ou droite
-			yrotate = (yrotate + 90)%360;
-
-		}
-		else if((nbXRotate%4)==0){
-
-			//cas de base pas de rotation en y
-			yrotate = (yrotate - 90)%360;
-
-		}
-
-	
-
-   }
+    {
+        updateAxe(currentY, inverse, &nbYrotate);
+        temp = currentX;
+        currentX = unusedAxe;
+        unusedAxe = temp;
+    }
     else if (direction=="LEFT")
     {
-		nbXRotate-=1;
- 
-
-		if((nbYRotate%4)==-1||(nbYRotate%4)==3){
-
-			//cas un deplacement a doirte a partir de l'initial
-			yrotate = (yrotate - 90)%360;
-		}
-		else if((nbYRotate%4)==-3||(nbYRotate%4)==1){
-
-			//cas un deplacement a doirte a partir de l'initial
-			yrotate = (yrotate + 90)%360;
-		}
-		else if((nbYRotate%4)==-2||(nbYRotate%4)==2){
-
-
-			//cas deux deplacement en y gauche ou droite
-			 xrotate = (xrotate - 90)%360;
-
-		}
-		else if((nbYRotate%4)==0){
-
-			//cas de base pas de rotation en X
-			 xrotate = (xrotate + 90)%360;
-
-		}
-
-
-
-
-		
-       
+         updateAxe(currentX, inverse, &nbXrotate);
+        temp = currentY;
+        currentY = unusedAxe;
+        unusedAxe = temp;
     }
 ///////////////////////
     else if (direction=="RIGHT")
     {
-		nbXRotate+=1;
-		if((nbYRotate%4)==-1||(nbYRotate%4)==3){
-
-			//cas un deplacement a doirte a partir de l'initial
-			yrotate = yrotate + 90;
-		    if (yrotate<0)
-		    {
-		        yrotate = 360 - yrotate;
-		    }
-		}
-		else if((nbYRotate%4)==-3||(nbYRotate%4)==1){
-
-			//cas un deplacement a doirte a partir de l'initial
-			yrotate = yrotate - 90;
-		    if (yrotate<0)
-		    {
-		        yrotate = 360 + yrotate;
-		    }
-		}
-		else if((nbYRotate%4)==-2||(nbYRotate%4)==2){
-
-			//cas deux deplacement en y gauche ou droite
-			xrotate = xrotate + 90;
-        	if (xrotate<0)
-       		{
-            	xrotate = 360 - xrotate;
-        	}
-
-		}
-		else if((nbYRotate%4)==0){
-
-			//cas de base pas de rotation en X
-			xrotate = xrotate - 90;
-        	if (xrotate<0)
-       		{
-            	xrotate = 360 + xrotate;
-        	}
-
-		}
-
-		
-       
-
+         updateAxe(currentX, -inverse, &nbXrotate);
+        temp = currentY;
+        currentY = unusedAxe;
+        unusedAxe = temp;
     }
+    printf("nbx : %d | nby : %d\n", nbXrotate, nbYrotate);
 }
 
 void drawCube(GLuint texName)
@@ -517,9 +427,6 @@ void display(void)
     glClear (GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix();
-    glRotatef(xrotate, 0.0, 1.0, 0.0);
-    glRotatef(yrotate, 1.0, 0.0, 0.0);
-	glRotatef(zrotate, 0.0, 0.0, 1.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
 
     drawMorpion();
