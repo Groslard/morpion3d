@@ -83,12 +83,11 @@
 		<Unit filename="../exo9/ppm.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="dessinCube.c">
+		<Unit filename="Makefile" />
+		<Unit filename="morpion.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="main.c">
-			<Option compilerVar="CC" />
-		</Unit>
+		<Unit filename="morpion.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
