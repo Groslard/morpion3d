@@ -40,6 +40,30 @@ int* unusedAxe = &zrotate;
 
 int* temp;
 
+
+
+// initialisation des variales de lumière
+// Proprietes de l'objet (sa matiere)
+//
+GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
+GLfloat mat_diffuse[] = { 0.1, 0.1, 0.1, 1.0 };
+GLfloat mat_specular[] = { 1, 1, 1, 1 };
+GLfloat mat_shininess[] = { 70.0 };
+GLfloat mat_emission[] = {0, 0, 0, 0};
+
+// Proprietes de la source lumineuse
+//
+GLfloat light_ambient[] = { 0.4, 0.4, 0.4, 0 };
+GLfloat light_diffuse[] = { 0.3, 0.3, 0.3, 0 };
+GLfloat light_specular[] = { .9, .9,.9, 0 };
+GLfloat light_position[] = { -7.0, 2.0, 5.0, 1.0 };
+
+// Proprietes generales de l'eclairage
+//
+GLfloat general_light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+
+
+
 /**
 *
 *
@@ -91,7 +115,24 @@ void initTextures()
     players[0].texture = createTexture(ROND);
     players[0].texture = createTexture(CROIX);
 }
+ void initLight(){
+    glEnable(GL_LIGHTING);
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, general_light_ambient);
+  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
+  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+  glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+  glEnable(GL_LIGHT0);
+
+  glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+  glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+  glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+
+ }
 void initFaces()
 {
     int l, c;
@@ -224,7 +265,7 @@ void updateAxe(int* axe, int sens, int* rotateCount){
     if(*rotateCount < 0){
         *rotateCount = 3;
     }
-
+// boucle de  rotation petit a petit
     glRotatef(xrotate, 0.0, 1.0, 0.0);
     glRotatef(yrotate, 1.0, 0.0, 0.0);
     glRotatef(zrotate, 0.0, 0.0, 1.0);
@@ -297,12 +338,16 @@ void drawCube(GLuint texName)
     // devant
 
     glBegin(GL_POLYGON);
+    glNormal3f(0.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 0, 0);
+    glNormal3f(1.0, 0.0, 0.0);
     glTexCoord2f(0.0, 1.0);
     glVertex3f (1, 0, 0);
+    glNormal3f(1.0, 1.0, 0.0);
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 1, 0);
+    glNormal3f(0.0, 1.0, 0.0);
     glTexCoord2f(1.0, 0.0);
     glVertex3f (0, 1, 0);
     glEnd();
@@ -310,12 +355,16 @@ void drawCube(GLuint texName)
     // arriere
 
     glBegin(GL_POLYGON);
+    glNormal3f(0.0, 0.0, 1.0);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 0, 1);
+    glNormal3f(1.0, 0.0, 1.0);
     glTexCoord2f(0.0, 1.0);
     glVertex3f (1, 0, 1);
+    glNormal3f(1.0, 1.0, 1.0);
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 1, 1);
+    glNormal3f(0.0, 1.0, 1.0);
     glTexCoord2f(1.0, 0.0);
     glVertex3f (0, 1, 1);
     glEnd();
@@ -323,12 +372,16 @@ void drawCube(GLuint texName)
     // gauche
 
     glBegin(GL_POLYGON);
+    glNormal3f(0.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 0, 0);
+    glNormal3f(0.0, 0.0, 1.0);
     glTexCoord2f(0.0, 1.0);
     glVertex3f (0, 0, 1);
+    glNormal3f(0.0, 1.0, 1.0);
     glTexCoord2f(1.0, 1.0);
     glVertex3f (0, 1, 1);
+    glNormal3f(0.0, 1.0, 0.0);
     glTexCoord2f(1.0, 0.0);
     glVertex3f (0, 1, 0);
     glEnd();
@@ -336,12 +389,16 @@ void drawCube(GLuint texName)
     //droite
 
     glBegin(GL_POLYGON);
+    glNormal3f(1.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (1, 0, 0);
+    glNormal3f(1.0, 0.0, 1.0);
     glTexCoord2f(0.0, 1.0);
     glVertex3f (1, 0, 1);
+    glNormal3f(1.0, 1.0, 1.0);
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 1, 1);
+    glNormal3f(1.0, 1.0, 0.0);
     glTexCoord2f(1.0, 0.0);
     glVertex3f (1, 1, 0);
     glEnd();
@@ -349,12 +406,16 @@ void drawCube(GLuint texName)
     //dessous
 
     glBegin(GL_POLYGON);
+    glNormal3f(0.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 0, 0);
+    glNormal3f(0.0, 0.0, 1.0);
     glTexCoord2f(0.0, 1.0);
     glVertex3f (0, 0, 1);
+    glNormal3f(1.0, 0.0, 1.0);
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 0, 1);
+    glNormal3f(1.0, 0.0, 0.0);
     glTexCoord2f(1.0, 0.0);
     glVertex3f (1, 0, 0);
     glEnd();
@@ -363,12 +424,16 @@ void drawCube(GLuint texName)
 
 
     glBegin(GL_POLYGON);
+    glNormal3f(0.0, 1.0, 0.0);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 1, 0);
+    glNormal3f(0.0, 1.0, 1.0);
     glTexCoord2f(0.0, 1.0);
     glVertex3f (0, 1, 1);
+    glNormal3f(1.0, 1.0, 1.0);
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 1, 1);
+    glNormal3f(1.0, 1.0, 0.0);
     glTexCoord2f(1.0, 0.0);
     glVertex3f (1, 1, 0);
     glEnd();
@@ -425,10 +490,12 @@ void display(void)
 
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_DEPTH_BUFFER_BIT);
-
+ 	glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
+  	glEnable(GL_LIGHTING); 	// Active l'éclairage
+  	glEnable(GL_LIGHT0); 	// Allume la lumière n°1
     glPushMatrix();
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
-
+    initLight();
     drawMorpion();
     glPopMatrix();
 

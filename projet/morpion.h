@@ -1,6 +1,6 @@
-#define CROIX "croix.ppm"
-#define ROND "croix.ppm"
-#define DEFAULT "brick10.ppm"
+#define CROIX "j2.ppm"
+#define ROND "j1.ppm"
+#define DEFAULT "nonJoue.ppm"
 
 #define VRAI 1
 #define FAUX 0
@@ -39,3 +39,4 @@ struct Face
     Face* rightFace;
     Player* winner;
 };
+
