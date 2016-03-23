@@ -27,16 +27,9 @@ Cube cubes[3][3][3];
 
 int nbFinishedFaces =0;
 
-int xrotate = 0;
+
 int yrotate = 0;
-int zrotate = 0;
 
-int nbXrotate = 0;
-int nbYrotate = 0;
-
-int* currentX = &xrotate;
-int* currentY = &yrotate;
-int* unusedAxe = &zrotate;
 
 int* temp;
 
@@ -115,8 +108,10 @@ void initTextures()
     players[0].texture = createTexture(ROND);
     players[0].texture = createTexture(CROIX);
 }
- void initLight(){
-    glEnable(GL_LIGHTING);
+
+void initLight(){
+
+  glEnable(GL_LIGHTING);
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, general_light_ambient);
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
@@ -255,23 +250,7 @@ void my_timer(int v)
     glutPostRedisplay();
 }
 
-void updateAxe(int* axe, int sens, int* rotateCount){
 
-    if(axe == &zrotate){
-    sens = -sens;
-    }
-    *axe = sens*90;
-    *rotateCount = (*rotateCount + sens)%4;
-    if(*rotateCount < 0){
-        *rotateCount = 3;
-    }
-// boucle de  rotation petit a petit
-    glRotatef(xrotate, 0.0, 1.0, 0.0);
-    glRotatef(yrotate, 1.0, 0.0, 0.0);
-    glRotatef(zrotate, 0.0, 0.0, 1.0);
-
-    *axe = 0;
-}
 
 void rotateMorpion(char *direction)
 {
@@ -282,49 +261,19 @@ void rotateMorpion(char *direction)
     * il faut donc utiliser   glutTimerFunc(40, my_timer, 1) apres avoir initialisé les variables de rotation
     **/
 
-
-
-    int inverse =1;
-
-    if((direction =="UP" || direction=="DOWN") && ((nbXrotate>1 && currentY != &zrotate) || (nbXrotate<2 && currentY == &zrotate))) {
-        inverse =1;
-        printf("coucou");
-    }else if((direction =="LEFT" || direction=="RIGHT") && ((nbXrotate>1 && currentY != &zrotate) || (nbXrotate<2 && currentY == &zrotate))){
-        inverse =1;
-        printf("coucou");
-    }
-
     if(direction=="UP")
     {
-        updateAxe(currentY, -inverse, &nbYrotate);
-        temp = currentX;
-        currentX = unusedAxe;
-        unusedAxe = temp;
+		yrotate = (yrotate - 90)%360;
     }
-
     else if (direction=="DOWN")
     {
-        updateAxe(currentY, inverse, &nbYrotate);
-        temp = currentX;
-        currentX = unusedAxe;
-        unusedAxe = temp;
+		yrotate = yrotate + 90;
+		if (yrotate<0)
+	    {
+	        yrotate = 360 + yrotate;
+	    }
+		
     }
-    else if (direction=="LEFT")
-    {
-         updateAxe(currentX, inverse, &nbXrotate);
-        temp = currentY;
-        currentY = unusedAxe;
-        unusedAxe = temp;
-    }
-///////////////////////
-    else if (direction=="RIGHT")
-    {
-         updateAxe(currentX, -inverse, &nbXrotate);
-        temp = currentY;
-        currentY = unusedAxe;
-        unusedAxe = temp;
-    }
-    printf("nbx : %d | nby : %d\n", nbXrotate, nbYrotate);
 }
 
 void drawCube(GLuint texName)
@@ -494,11 +443,12 @@ void display(void)
   	glEnable(GL_LIGHTING); 	// Active l'éclairage
   	glEnable(GL_LIGHT0); 	// Allume la lumière n°1
     glPushMatrix();
+	glRotatef(yrotate, 1.0, 0.0, 0.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
     initLight();
     drawMorpion();
     glPopMatrix();
-
+	
     glutSwapBuffers();
 }
 
