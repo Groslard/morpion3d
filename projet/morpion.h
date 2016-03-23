@@ -1,6 +1,7 @@
 #define CROIX "j2.ppm"
 #define ROND "j1.ppm"
 #define DEFAULT "nonJoue.ppm"
+#define SOL "sol.ppm"
 
 #define VRAI 1
 #define FAUX 0

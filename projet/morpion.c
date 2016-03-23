@@ -11,11 +11,11 @@ GLubyte* data;
 int width, height;
 
 GLuint defaultTexture;
+GLuint solTexture;
 
 
-float zTranslate = -3.0;
 float ecartCube=1.5;
-GLfloat    xAngle = 0.0, yAngle = 0.0, zAngle = 0.0;
+
 
 Player players[2];
 Player* currentPlayer;
@@ -29,9 +29,11 @@ int nbFinishedFaces =0;
 
 
 int yrotate = 0;
-
-
 int* temp;
+
+//variable de sol
+float largeurCarreSol=1.0;
+int nbCarreSol=10;
 
 
 
@@ -104,6 +106,7 @@ void initTextures()
     glEnable(GL_DEPTH_TEST);
 
     // TODO : remplacer les 0,1,2 par une variable qu on incremente dans la fonction ?
+    solTexture=createTexture(SOL);
     defaultTexture = createTexture(DEFAULT);
     players[0].texture = createTexture(ROND);
     players[0].texture = createTexture(CROIX);
@@ -272,8 +275,40 @@ void rotateMorpion(char *direction)
 	    {
 	        yrotate = 360 + yrotate;
 	    }
-		
+
     }
+}
+
+void drawFloor(GLuint texName){
+    glPushMatrix();
+
+    glBindTexture(GL_TEXTURE_2D, texName);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    int i, j;
+   for(i=0; i<nbCarreSol; i++){
+      glPushMatrix();
+      for(j=0; j<nbCarreSol; j++){
+      // draw carre
+        glBegin(GL_POLYGON);
+        glNormal3f(0.0, 0.0, 0.0);
+        glTexCoord2f(0.0, 0.0);
+        glVertex3f (0, 0, 0);
+        glNormal3f(0.0, 0.0, 1.0);
+        glTexCoord2f(0.0, 1.0);
+        glVertex3f (0, 0, 1);
+        glNormal3f(1.0, 0.0, 1.0);
+        glTexCoord2f(1.0, 1.0);
+        glVertex3f (1, 0, 1);
+        glNormal3f(1.0, 0.0, 0.0);
+        glTexCoord2f(1.0, 0.0);
+        glVertex3f (1, 0, 0);
+        glEnd();
+         glTranslatef(0.0, 0.0, 1.0);
+      }
+      glPopMatrix();
+      glTranslatef(1.0, 0.0, 0.0);
+   }
+   glPopMatrix();
 }
 
 void drawCube(GLuint texName)
@@ -442,13 +477,26 @@ void display(void)
  	glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
   	glEnable(GL_LIGHTING); 	// Active l'éclairage
   	glEnable(GL_LIGHT0); 	// Allume la lumière n°1
+
+
     glPushMatrix();
+    glTranslatef(-4.5,-4.0,-4.0);
+    drawFloor(solTexture);
+    glPopMatrix();
+
+    glPushMatrix();
+
 	glRotatef(yrotate, 1.0, 0.0, 0.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
     initLight();
     drawMorpion();
+
+
+
     glPopMatrix();
-	
+
+
+
     glutSwapBuffers();
 }
 
