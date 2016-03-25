@@ -1,4 +1,5 @@
 #include <GL/glut.h>
+#include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "morpion.h"
@@ -16,11 +17,13 @@ GLuint solTexture;
 
 float ecartCube=1.5;
 
+Player player1;
+Player player2;
 
-Player players[2];
 Player* currentPlayer;
+Player* waintingPlayer;
 
-Face faces[6];
+Face faces[4];
 Face* currentFace;
 
 Cube cubes[3][3][3];
@@ -28,7 +31,9 @@ Cube cubes[3][3][3];
 int nbFinishedFaces =0;
 
 
-int yrotate = 0;
+int xrotate = 0;
+int rotate_final = 0;
+int rotate_available = VRAI;
 int* temp;
 
 //variable de sol
@@ -57,8 +62,6 @@ GLfloat light_position[] = { -7.0, 2.0, 5.0, 1.0 };
 //
 GLfloat general_light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
 
-
-
 /**
 *
 *
@@ -68,15 +71,16 @@ GLfloat general_light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
 ***/
 void initPlayers()
 {
-    players[0].pathTexture = CROIX;
-    players[0].name = "Player 1";
-    players[0].pts = 0;
+    player1.pathTexture = CROIX;
+    player1.name = "Player 1";
+    player1.pts = 0;
 
-    players[1].pathTexture = ROND;
-    players[1].name = "Player 2";
-    players[1].pts = 0;
+    player2.pathTexture = ROND;
+    player2.name = "Player 2";
+    player2.pts = 0;
 
-    currentPlayer = &players[0];
+    currentPlayer = &player1;
+    waintingPlayer = &player2;
 }
 
 GLuint createTexture(char* texPath)
@@ -105,32 +109,32 @@ void initTextures()
     glClearColor (0, 0, 0, 0);
     glEnable(GL_DEPTH_TEST);
 
-    // TODO : remplacer les 0,1,2 par une variable qu on incremente dans la fonction ?
     solTexture=createTexture(SOL);
     defaultTexture = createTexture(DEFAULT);
-    players[0].texture = createTexture(ROND);
-    players[0].texture = createTexture(CROIX);
+    player1.texture = createTexture(player1.pathTexture);
+    player2.texture = createTexture(player2.pathTexture);
 }
 
-void initLight(){
+void initLight()
+{
 
-  glEnable(GL_LIGHTING);
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, general_light_ambient);
-  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+    glEnable(GL_LIGHTING);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, general_light_ambient);
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
-  glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-  glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-  glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glEnable(GL_LIGHT0);
 
-  glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-  glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-  glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
 
- }
+}
 void initFaces()
 {
     int l, c;
@@ -142,55 +146,31 @@ void initFaces()
         {
             // devant
             faces[0].cubes[i]=&cubes[c][l][0];
-            // dessus
-            faces[1].cubes[i]=&cubes[c][2][l];
-            // derriere
-            faces[2].cubes[i]=&cubes[c][2-l][2];
-            // dessous
-            faces[3].cubes[i]=&cubes[c][0][2-l];
-            // gauche
-            faces[4].cubes[i]=&cubes[0][l][2-c];
             // droite
-            faces[5].cubes[i]=&cubes[2][l][c];
+            faces[1].cubes[i]=&cubes[2][l][c];
+            // derriere
+            faces[2].cubes[i]=&cubes[2-c][l][2];
+            // gauche
+            faces[3].cubes[i]=&cubes[0][l][2-c];
             i++;
         }
     }
 
     // devant
-    faces[0].upFace = &faces[1];
-    faces[0].downFace = &faces[3];
-    faces[0].leftFace = &faces[4];
-    faces[0].rightFace = &faces[5];
-
-    // dessus
-    faces[1].upFace = &faces[2];
-    faces[1].downFace = &faces[0];
-    faces[1].leftFace = &faces[4];
-    faces[1].rightFace = &faces[5];
-
-    // derriere
-    faces[2].upFace = &faces[3];
-    faces[2].downFace = &faces[1];
-    faces[2].leftFace = &faces[4];
-    faces[2].rightFace = &faces[5];
-
-    // dessous
-    faces[3].upFace = &faces[0];
-    faces[3].downFace = &faces[2];
-    faces[3].leftFace = &faces[4];
-    faces[3].rightFace = &faces[5];
-
-    // gauche
-    faces[4].upFace = &faces[1];
-    faces[4].downFace = &faces[3];
-    faces[4].leftFace = &faces[2];
-    faces[4].rightFace = &faces[0];
+    faces[0].leftFace = &faces[3];
+    faces[0].rightFace = &faces[1];
 
     // droite
-    faces[5].upFace = &faces[1];
-    faces[5].downFace = &faces[3];
-    faces[5].leftFace = &faces[0];
-    faces[5].rightFace = &faces[2];
+    faces[1].leftFace = &faces[0];
+    faces[1].rightFace = &faces[2];
+
+    // derriere
+    faces[2].leftFace = &faces[1];
+    faces[2].rightFace = &faces[3];
+
+    // gauche
+    faces[3].leftFace = &faces[2];
+    faces[3].rightFace = &faces[0];
 
     currentFace = &faces[0];
 }
@@ -208,8 +188,6 @@ void init(void)
     gluLookAt (0.0, 0.0, -3*ecartCube, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
-
-
 /**
 *
 *
@@ -217,6 +195,12 @@ void init(void)
 *
 *
 ***/
+
+void endTurn(){
+    Player *tmp = currentPlayer;
+    currentPlayer = waintingPlayer;
+    waintingPlayer = tmp;
+}
 
 void testFaceFinished(Face face)
 {
@@ -238,6 +222,11 @@ void testGameFinished()
     // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
 }
 
+void selectCube(Cube* cube){
+    cube->player = currentPlayer;
+    endTurn();
+    glutPostRedisplay();
+}
 
 /***
 *
@@ -247,68 +236,77 @@ void testGameFinished()
 *
 ***/
 
-void my_timer(int v)
+void rotate_timer(int v)
 {
-    glutTimerFunc(40, my_timer, 1);
+    if(xrotate < rotate_final){
+        xrotate += 10;
+        glutTimerFunc(ROTATESPEED, rotate_timer, 1);
+    }else if(xrotate > rotate_final){
+        xrotate -= 10;
+        glutTimerFunc(ROTATESPEED, rotate_timer, 1);
+    }else{
+        if(xrotate<0){
+            xrotate = 360 + xrotate;
+        }else if(xrotate >360){
+            xrotate = xrotate%360;
+        }
+        rotate_available = VRAI;
+    }
     glutPostRedisplay();
 }
 
-
-
 void rotateMorpion(char *direction)
 {
-
-    /**
-    * TODO : au lieu de faire un glrotate, tu memorise de cb faut rotate, et tu fais appel au timer
-    * C est donc le timer qui va se rappeler n fois jusqu a ce que le cube soit rotate comme il faut
-    * il faut donc utiliser   glutTimerFunc(40, my_timer, 1) apres avoir initialisé les variables de rotation
-    **/
-
-    if(direction=="UP")
-    {
-		yrotate = (yrotate - 90)%360;
+    if(rotate_available == VRAI){
+        if(direction=="RIGHT")
+        {
+            rotate_final = xrotate - 90;
+            currentFace = currentFace->rightFace;
+        }
+        else if (direction=="LEFT")
+        {
+            rotate_final = xrotate + 90;
+            currentFace = currentFace->leftFace;
+        }
+        glutTimerFunc(ROTATESPEED, rotate_timer, 1);
+       rotate_available = FAUX;
     }
-    else if (direction=="DOWN")
-    {
-		yrotate = yrotate + 90;
-		if (yrotate<0)
-	    {
-	        yrotate = 360 + yrotate;
-	    }
 
-    }
 }
 
-void drawFloor(GLuint texName){
+void drawFloor(GLuint texName)
+{
     glPushMatrix();
 
     glBindTexture(GL_TEXTURE_2D, texName);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     int i, j;
-   for(i=0; i<nbCarreSol; i++){
-      glPushMatrix();
-      for(j=0; j<nbCarreSol; j++){
-      // draw carre
-        glBegin(GL_POLYGON);
-        glNormal3f(0.0, 0.0, 0.0);
-        glTexCoord2f(0.0, 0.0);
-        glVertex3f (0, 0, 0);
-        glNormal3f(0.0, 0.0, 1.0);
-        glTexCoord2f(0.0, 1.0);
-        glVertex3f (0, 0, 1);
-        glNormal3f(1.0, 0.0, 1.0);
-        glTexCoord2f(1.0, 1.0);
-        glVertex3f (1, 0, 1);
-        glNormal3f(1.0, 0.0, 0.0);
-        glTexCoord2f(1.0, 0.0);
-        glVertex3f (1, 0, 0);
-        glEnd();
-         glTranslatef(0.0, 0.0, 1.0);
-      }
-      glPopMatrix();
-      glTranslatef(1.0, 0.0, 0.0);
-   }
-   glPopMatrix();
+    for(i=0; i<nbCarreSol; i++)
+    {
+        glPushMatrix();
+        for(j=0; j<nbCarreSol; j++)
+        {
+            // draw carre
+            glBegin(GL_POLYGON);
+            glNormal3f(0.0, 0.0, 0.0);
+            glTexCoord2f(0.0, 0.0);
+            glVertex3f (0, 0, 0);
+            glNormal3f(0.0, 0.0, 1.0);
+            glTexCoord2f(0.0, 1.0);
+            glVertex3f (0, 0, 1);
+            glNormal3f(1.0, 0.0, 1.0);
+            glTexCoord2f(1.0, 1.0);
+            glVertex3f (1, 0, 1);
+            glNormal3f(1.0, 0.0, 0.0);
+            glTexCoord2f(1.0, 0.0);
+            glVertex3f (1, 0, 0);
+            glEnd();
+            glTranslatef(0.0, 0.0, 1.0);
+        }
+        glPopMatrix();
+        glTranslatef(1.0, 0.0, 0.0);
+    }
+    glPopMatrix();
 }
 
 void drawCube(GLuint texName)
@@ -320,7 +318,6 @@ void drawCube(GLuint texName)
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     // devant
-
     glBegin(GL_POLYGON);
     glNormal3f(0.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
@@ -337,7 +334,6 @@ void drawCube(GLuint texName)
     glEnd();
 
     // arriere
-
     glBegin(GL_POLYGON);
     glNormal3f(0.0, 0.0, 1.0);
     glTexCoord2f(0.0, 0.0);
@@ -354,7 +350,6 @@ void drawCube(GLuint texName)
     glEnd();
 
     // gauche
-
     glBegin(GL_POLYGON);
     glNormal3f(0.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
@@ -371,7 +366,6 @@ void drawCube(GLuint texName)
     glEnd();
 
     //droite
-
     glBegin(GL_POLYGON);
     glNormal3f(1.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
@@ -388,7 +382,6 @@ void drawCube(GLuint texName)
     glEnd();
 
     //dessous
-
     glBegin(GL_POLYGON);
     glNormal3f(0.0, 0.0, 0.0);
     glTexCoord2f(0.0, 0.0);
@@ -405,8 +398,6 @@ void drawCube(GLuint texName)
     glEnd();
 
     //dessus
-
-
     glBegin(GL_POLYGON);
     glNormal3f(0.0, 1.0, 0.0);
     glTexCoord2f(0.0, 0.0);
@@ -427,11 +418,9 @@ void drawCube(GLuint texName)
 
 void drawMorpion()
 {
-
     int zMorpion, yMorpion, xMorpion;
 
     glPushMatrix();
-
 
     for(zMorpion=0; zMorpion<3; zMorpion++)
     {
@@ -441,14 +430,17 @@ void drawMorpion()
             glPushMatrix();
             for(xMorpion=0; xMorpion<3; xMorpion++)
             {
-                Player* cubePlayer = cubes[xMorpion][yMorpion][zMorpion].player;
-                if(cubePlayer == NULL)
-                {
-                    drawCube(defaultTexture);
-                }
-                else
-                {
-                    drawCube(cubePlayer->texture);
+                if(zMorpion!=1 || xMorpion!=1){
+
+                    Player* cubePlayer = cubes[xMorpion][yMorpion][zMorpion].player;
+                    if(cubePlayer == NULL)
+                    {
+                        drawCube(defaultTexture);
+                    }
+                    else
+                    {
+                        drawCube(cubePlayer->texture);
+                    }
                 }
                 glTranslatef(-ecartCube, 0.0, 0.0);
             }
@@ -468,15 +460,23 @@ void drawMorpion()
 *
 *
 ***/
+void printText(int x, int y, char *string, void *font)
+{
+	int len,i; // len donne la longueur de la chaîne de caractères
+
+	glRasterPos2f(x,y); // Positionne le premier caractère de la chaîne
+	len = (int) strlen(string); // Calcule la longueur de la chaîne
+	for (i = 0; i < len; i++) glutBitmapCharacter(font,string[i]); // Affiche chaque caractère de la chaîne
+}
 
 void display(void)
 {
 
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_DEPTH_BUFFER_BIT);
- 	glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
-  	glEnable(GL_LIGHTING); 	// Active l'éclairage
-  	glEnable(GL_LIGHT0); 	// Allume la lumière n°1
+    glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
+    glEnable(GL_LIGHTING); 	// Active l'éclairage
+    glEnable(GL_LIGHT0); 	// Allume la lumière n°1
 
 
     glPushMatrix();
@@ -485,17 +485,14 @@ void display(void)
     glPopMatrix();
 
     glPushMatrix();
-
-	glRotatef(yrotate, 1.0, 0.0, 0.0);
+    glRotatef(xrotate, 0.0, 1.0, 0.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
     initLight();
     drawMorpion();
-
-
-
     glPopMatrix();
 
-
+    glColor3d(1,1,1);
+    printText(-300, -200, "coucou", GLUT_BITMAP_TIMES_ROMAN_24);
 
     glutSwapBuffers();
 }
@@ -522,21 +519,12 @@ void SpecialInput(int key, int x, int y)
 {
     switch(key)
     {
-    case GLUT_KEY_UP:
-        rotateMorpion("UP");
-        currentFace = currentFace->upFace;
-        break;
-    case GLUT_KEY_DOWN:
-        rotateMorpion("DOWN");
-        currentFace = currentFace->downFace;
-        break;
     case GLUT_KEY_LEFT:
         rotateMorpion("LEFT");
-        currentFace = currentFace->leftFace;
+
         break;
     case GLUT_KEY_RIGHT:
         rotateMorpion("RIGHT");
-        currentFace = currentFace->rightFace;
         break;
     }
     glutPostRedisplay();
@@ -547,37 +535,36 @@ void keyboard(unsigned char key, int x, int y)
     switch (key)
     {
     case '1':
-        currentFace->cubes[0]->player = currentPlayer;
+        selectCube(currentFace->cubes[0]);
         break;
     case '2':
-        currentFace->cubes[1]->player = currentPlayer;
+        selectCube(currentFace->cubes[1]);
         break;
     case '3':
-        currentFace->cubes[2]->player = currentPlayer;
+        selectCube(currentFace->cubes[2]);
         break;
     case '4':
-        currentFace->cubes[3]->player = currentPlayer;
+        selectCube(currentFace->cubes[3]);
         break;
     case '5':
-        currentFace->cubes[4]->player = currentPlayer;
+        selectCube(currentFace->cubes[4]);
         break;
     case '6':
-        currentFace->cubes[5]->player = currentPlayer;
+        selectCube(currentFace->cubes[5]);
         break;
     case '7':
-        currentFace->cubes[6]->player = currentPlayer;
+        selectCube(currentFace->cubes[6]);
         break;
     case '8':
-        currentFace->cubes[7]->player = currentPlayer;
+        selectCube(currentFace->cubes[7]);
         break;
     case '9':
-        currentFace->cubes[8]->player = currentPlayer;
+        selectCube(currentFace->cubes[8]);
         break;
     case 27:
         exit(0);
         break;
     }
-    glutPostRedisplay();
 }
 
 
@@ -596,7 +583,7 @@ int main(int argc, char** argv)
     glutInitWindowSize (500, 500);
     glutInitWindowPosition (100, 100);
 
-    glutCreateWindow (argv[0]);
+    glutCreateWindow ("Super Morpion 3D");
     init ();
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);

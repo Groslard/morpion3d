@@ -6,6 +6,8 @@
 #define VRAI 1
 #define FAUX 0
 
+#define ROTATESPEED 20
+
 
 typedef struct Color Color;
 struct Color
@@ -34,8 +36,6 @@ typedef struct Face Face;
 struct Face
 {
     Cube* cubes[9];
-    Face* upFace;
-    Face* downFace;
     Face* leftFace;
     Face* rightFace;
     Player* winner;
