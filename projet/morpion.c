@@ -27,6 +27,7 @@ Face faces[4];
 Face* currentFace;
 
 Cube cubes[3][3][3];
+Cube* selectedCube;
 
 int nbFinishedFaces =0;
 
@@ -35,6 +36,9 @@ int xrotate = 0;
 int rotate_final = 0;
 int rotate_available = VRAI;
 int* temp;
+
+float selectEffect = 1.0;
+int reduce = VRAI;
 
 //variable de sol
 float largeurCarreSol=1.0;
@@ -100,7 +104,6 @@ GLuint createTexture(char* texPath)
                  height, 0, GL_RGB, GL_UNSIGNED_BYTE,
                  data);
 
-    glEnable(GL_TEXTURE_2D);
     return texNames[0];
 }
 
@@ -181,11 +184,11 @@ void init(void)
     initTextures();
     initFaces();
 
-    glClearColor (0.0, 0.0, 1.0, 0.0);
+    glClearColor (0.3, 0.3, 0.3, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glLoadIdentity ();
-    gluLookAt (0.0, 0.0, -3*ecartCube, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+    gluLookAt (0.0, 0.0, -2.7*ecartCube, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 /**
@@ -196,7 +199,9 @@ void init(void)
 *
 ***/
 
-void endTurn(){
+void endTurn()
+{
+
     Player *tmp = currentPlayer;
     currentPlayer = waintingPlayer;
     waintingPlayer = tmp;
@@ -222,11 +227,37 @@ void testGameFinished()
     // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
 }
 
-void selectCube(Cube* cube){
-    cube->player = currentPlayer;
-    endTurn();
+void select_timer(int v)
+{
+    if(reduce == VRAI){
+        selectEffect-=0.04;
+    }else{
+        selectEffect+=0.04;
+    }
     glutPostRedisplay();
+    if(selectEffect < 0){
+        reduce = FAUX;
+        selectedCube->player = currentPlayer;
+        selectEffect = 0.0;
+    }
+    if(selectEffect < 1.0){
+         glutTimerFunc(1, select_timer, 1);
+    }else{
+        reduce = VRAI;
+        selectedCube = NULL;
+        endTurn();
+    }
+
 }
+
+void selectCube(Cube* cube)
+{
+    if(cube->player == NULL && selectedCube == NULL){
+        selectedCube = cube;
+        glutTimerFunc(50, select_timer, 1);
+    }
+}
+
 
 /***
 *
@@ -238,16 +269,24 @@ void selectCube(Cube* cube){
 
 void rotate_timer(int v)
 {
-    if(xrotate < rotate_final){
-        xrotate += 10;
+    if(xrotate < rotate_final)
+    {
+        xrotate += 2;
         glutTimerFunc(ROTATESPEED, rotate_timer, 1);
-    }else if(xrotate > rotate_final){
-        xrotate -= 10;
+    }
+    else if(xrotate > rotate_final)
+    {
+        xrotate -= 2;
         glutTimerFunc(ROTATESPEED, rotate_timer, 1);
-    }else{
-        if(xrotate<0){
+    }
+    else
+    {
+        if(xrotate<0)
+        {
             xrotate = 360 + xrotate;
-        }else if(xrotate >360){
+        }
+        else if(xrotate >360)
+        {
             xrotate = xrotate%360;
         }
         rotate_available = VRAI;
@@ -257,7 +296,8 @@ void rotate_timer(int v)
 
 void rotateMorpion(char *direction)
 {
-    if(rotate_available == VRAI){
+    if(rotate_available == VRAI)
+    {
         if(direction=="RIGHT")
         {
             rotate_final = xrotate - 90;
@@ -269,44 +309,9 @@ void rotateMorpion(char *direction)
             currentFace = currentFace->leftFace;
         }
         glutTimerFunc(ROTATESPEED, rotate_timer, 1);
-       rotate_available = FAUX;
+        rotate_available = FAUX;
     }
 
-}
-
-void drawFloor(GLuint texName)
-{
-    glPushMatrix();
-
-    glBindTexture(GL_TEXTURE_2D, texName);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    int i, j;
-    for(i=0; i<nbCarreSol; i++)
-    {
-        glPushMatrix();
-        for(j=0; j<nbCarreSol; j++)
-        {
-            // draw carre
-            glBegin(GL_POLYGON);
-            glNormal3f(0.0, 0.0, 0.0);
-            glTexCoord2f(0.0, 0.0);
-            glVertex3f (0, 0, 0);
-            glNormal3f(0.0, 0.0, 1.0);
-            glTexCoord2f(0.0, 1.0);
-            glVertex3f (0, 0, 1);
-            glNormal3f(1.0, 0.0, 1.0);
-            glTexCoord2f(1.0, 1.0);
-            glVertex3f (1, 0, 1);
-            glNormal3f(1.0, 0.0, 0.0);
-            glTexCoord2f(1.0, 0.0);
-            glVertex3f (1, 0, 0);
-            glEnd();
-            glTranslatef(0.0, 0.0, 1.0);
-        }
-        glPopMatrix();
-        glTranslatef(1.0, 0.0, 0.0);
-    }
-    glPopMatrix();
 }
 
 void drawCube(GLuint texName)
@@ -421,7 +426,7 @@ void drawMorpion()
     int zMorpion, yMorpion, xMorpion;
 
     glPushMatrix();
-
+    Cube* cube;
     for(zMorpion=0; zMorpion<3; zMorpion++)
     {
         glPushMatrix();
@@ -430,9 +435,14 @@ void drawMorpion()
             glPushMatrix();
             for(xMorpion=0; xMorpion<3; xMorpion++)
             {
-                if(zMorpion!=1 || xMorpion!=1){
-
-                    Player* cubePlayer = cubes[xMorpion][yMorpion][zMorpion].player;
+                if(zMorpion!=1 || xMorpion!=1)
+                {
+                    glPushMatrix();
+                    cube = &cubes[xMorpion][yMorpion][zMorpion];
+                    if(cube == selectedCube){
+                        glScalef(selectEffect, selectEffect, selectEffect);
+                    }
+                    Player* cubePlayer = cube->player;
                     if(cubePlayer == NULL)
                     {
                         drawCube(defaultTexture);
@@ -441,6 +451,7 @@ void drawMorpion()
                     {
                         drawCube(cubePlayer->texture);
                     }
+                    glPopMatrix();
                 }
                 glTranslatef(-ecartCube, 0.0, 0.0);
             }
@@ -460,13 +471,14 @@ void drawMorpion()
 *
 *
 ***/
+
 void printText(int x, int y, char *string, void *font)
 {
-	int len,i; // len donne la longueur de la chaîne de caractères
+    int len,i; // len donne la longueur de la chaîne de caractères
 
-	glRasterPos2f(x,y); // Positionne le premier caractère de la chaîne
-	len = (int) strlen(string); // Calcule la longueur de la chaîne
-	for (i = 0; i < len; i++) glutBitmapCharacter(font,string[i]); // Affiche chaque caractère de la chaîne
+    glRasterPos2f(x,y); // Positionne le premier caractère de la chaîne
+    len = (int) strlen(string); // Calcule la longueur de la chaîne
+    for (i = 0; i < len; i++) glutBitmapCharacter(font,string[i]); // Affiche chaque caractère de la chaîne
 }
 
 void display(void)
@@ -480,19 +492,18 @@ void display(void)
 
 
     glPushMatrix();
-    glTranslatef(-4.5,-4.0,-4.0);
-    drawFloor(solTexture);
-    glPopMatrix();
-
-    glPushMatrix();
     glRotatef(xrotate, 0.0, 1.0, 0.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
     initLight();
+    glEnable(GL_TEXTURE_2D);
     drawMorpion();
+    glDisable(GL_TEXTURE_2D);
     glPopMatrix();
 
-    glColor3d(1,1,1);
-    printText(-300, -200, "coucou", GLUT_BITMAP_TIMES_ROMAN_24);
+
+    glPushMatrix();
+    printText(6,6, GLUT_BITMAP_9_BY_15,"coucou");
+    glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -580,8 +591,8 @@ int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode (GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
-    glutInitWindowSize (500, 500);
-    glutInitWindowPosition (100, 100);
+    glutInitWindowSize (1000, 1000);
+    glutInitWindowPosition (400, 50);
 
     glutCreateWindow ("Super Morpion 3D");
     init ();

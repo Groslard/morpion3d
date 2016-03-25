@@ -6,7 +6,7 @@
 #define VRAI 1
 #define FAUX 0
 
-#define ROTATESPEED 20
+#define ROTATESPEED 1
 
 
 typedef struct Color Color;
