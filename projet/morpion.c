@@ -47,6 +47,9 @@ int nbCarreSol=10;
 
 
 
+char *chaineScore;
+
+
 
 // initialisation des variales de lumière
 // Proprietes de l'objet (sa matiere)
@@ -182,6 +185,7 @@ void initFaces()
 
 void init(void)
 {
+    chaineScore = malloc(sizeof(char)*100);
     initPlayers();
     initTextures();
     initFaces();
@@ -504,12 +508,13 @@ void drawMorpion()
 
 void printText(int x, int y, char *string, void *font)
 {
-    int len,i; // len donne la longueur de la chaîne de caractères
+	int len,i; // len donne la longueur de la chaîne de caractères
 
-    glRasterPos2f(x,y); // Positionne le premier caractère de la chaîne
-    len = (int) strlen(string); // Calcule la longueur de la chaîne
-    for (i = 0; i < len; i++) glutBitmapCharacter(font,string[i]); // Affiche chaque caractère de la chaîne
+	glRasterPos2f(x,y); // Positionne le premier caractère de la chaîne
+	len = (int) strlen(string); // Calcule la longueur de la chaîne
+	for (i = 0; i < len; i++) glutBitmapCharacter(font,string[i]); // Affiche chaque caractère de la chaîne
 }
+
 
 void display(void)
 {
@@ -518,8 +523,7 @@ void display(void)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_DEPTH_BUFFER_BIT);
-   // glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
-  //  glEnable(GL_LIGHTING); 	// Active l'éclairage
+
 
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, general_light_ambient);
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
@@ -538,8 +542,11 @@ void display(void)
     glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
 
 
-
     glPushMatrix();
+
+    sprintf(chaineScore, "Score : joueur 1 - %d / joueur 2 - %d", player1.pts, player2.pts);
+    printText(2,6,chaineScore,GLUT_BITMAP_HELVETICA_18);
+
 
     glRotatef(xrotate, 0.0, 1.0, 0.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
@@ -554,10 +561,6 @@ void display(void)
     glDisable(GL_LIGHTING);
 
 
-
-    glPushMatrix();
-    printText(6,6, GLUT_BITMAP_9_BY_15,"coucou");
-    glPopMatrix();
 
     glutSwapBuffers();
 }
@@ -631,8 +634,6 @@ void keyboard(unsigned char key, int x, int y)
         break;
     }
 }
-
-
 
 /***
 *
