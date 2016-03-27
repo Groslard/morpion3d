@@ -200,6 +200,22 @@ void init(void)
 *
 ***/
 
+
+Player* checkFaceFinished(Face face)
+{
+    // Si tous les cubes de la current face sont joués ou un joueur l'a gagnée:
+    nbFinishedFaces = nbFinishedFaces + 1;
+}
+
+Player* checkGameFinished()
+{
+    // Si players[0].pts == 3 && players[1].pts == 3    EGALITE
+    // Si players[0].pts > players[1].pts   PLAYERS 1 GAGNE
+    // Si players[0].pts < players[1].pts   PLAYERS 2 GAGNE
+    // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
+    return NULL;
+}
+
 void checkPlayWinOnFace(Face *face, int cubeId){
     if(face->winner==NULL){
         return;
@@ -230,20 +246,8 @@ void endTurn()
     waintingPlayer = tmp;
 }
 
-Player* checkGameFinished()
-{
-    // Si players[0].pts == 3 && players[1].pts == 3    EGALITE
-    // Si players[0].pts > players[1].pts   PLAYERS 1 GAGNE
-    // Si players[0].pts < players[1].pts   PLAYERS 2 GAGNE
-    // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
-    return NULL;
-}
 
-void checkFaceFinished(Face face)
-{
-    // Si tous les cubes de la current face sont joués ou un joueur l'a gagnée:
-    nbFinishedFaces = nbFinishedFaces + 1;
-}
+
 
 
 
