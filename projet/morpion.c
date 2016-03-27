@@ -205,32 +205,63 @@ void init(void)
 *
 ***/
 
-
-Player* checkFaceFinished(Face face)
-{
-    // Si tous les cubes de la current face sont joués ou un joueur l'a gagnée:
-    nbFinishedFaces = nbFinishedFaces + 1;
-}
-
 Player* checkGameFinished()
 {
-    // Si players[0].pts == 3 && players[1].pts == 3    EGALITE
-    // Si players[0].pts > players[1].pts   PLAYERS 1 GAGNE
-    // Si players[0].pts < players[1].pts   PLAYERS 2 GAGNE
-    // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
+    if(nbFinishedFaces==4){
+        exit(0);
+    }
     return NULL;
 }
 
+
+int isLineWin(Face *face, int cubeId){
+    Cube* lineCubes[3] = { face->cubes[cubeId], face->cubes[cubeId/3*3+(cubeId+1)%3], face->cubes[cubeId/3*3+(cubeId+2)%3]};
+    if(lineCubes[0]->player == lineCubes[1]->player && lineCubes[0]->player == lineCubes[2]->player){
+        return VRAI;
+    }else{
+        return FAUX;
+    }
+}
+
+int isColWin(Face *face, int cubeId){
+    Cube* colCubes[3] = { face->cubes[cubeId], face->cubes[(cubeId+3)%9], face->cubes[(cubeId+6)%9]};
+    if(colCubes[0]->player == colCubes[1]->player &&  colCubes[0]->player == colCubes[2]->player){
+        return VRAI;
+    }else{
+        return FAUX;
+    }
+}
+
+int isDiagWin(Face *face, int cubeId){
+    return FAUX;
+}
+
+int isFaceFinished(Face *face)
+{
+    int i;
+    for(i=0; i<9; i++){
+        if(face->cubes[i]->player == NULL){
+            return FAUX;
+        }
+    }
+    return VRAI;
+}
+
 void checkPlayWinOnFace(Face *face, int cubeId){
-    if(face->winner==NULL){
+    if(face->winner!=NULL){
         return;
     }
 
-    Cube* colCubes[3] = { face->cubes[cubeId], face->cubes[(cubeId+3)%9], face->cubes[(cubeId+6)%9]};
-    Cube* lineCubes[3] = { face->cubes[cubeId], face->cubes[(cubeId+1)%4], face->cubes[(cubeId+6)%4]};
-
-
+    if(isLineWin(face, cubeId)==VRAI || isColWin(face, cubeId)==VRAI || isDiagWin(face, cubeId)==VRAI){
+        nbFinishedFaces = nbFinishedFaces + 1;
+        face->winner = currentPlayer;
+        currentPlayer->pts += 1;
+    }else if(isFaceFinished(face) == VRAI){
+        nbFinishedFaces = nbFinishedFaces + 1;
+    }
 }
+
+
 
 int checkPlayWin()
 {
@@ -246,6 +277,7 @@ void endTurn()
 {
     checkPlayWin();
     Player* isFinish = checkGameFinished();
+
     Player *tmp = currentPlayer;
     currentPlayer = waintingPlayer;
     waintingPlayer = tmp;
@@ -559,8 +591,6 @@ void display(void)
     glPopMatrix();
 
     glDisable(GL_LIGHTING);
-
-
 
     glutSwapBuffers();
 }
