@@ -12,7 +12,7 @@ GLubyte* data;
 int width, height;
 
 GLuint defaultTexture;
-GLuint solTexture;
+
 
 
 float ecartCube=1.5;
@@ -47,22 +47,22 @@ int nbCarreSol=10;
 
 
 
+
 // initialisation des variales de lumière
 // Proprietes de l'objet (sa matiere)
 //
-GLfloat mat_ambient[] = { 0.7, 0.7, 0.7, 1.0 };
-GLfloat mat_diffuse[] = { 0.1, 0.1, 0.1, 1.0 };
+GLfloat mat_ambient[] = { 0.3, 0.3, 0.3, 1.0 }; // GESTION DE LA COULEUR
+GLfloat mat_diffuse[] = { 0.8, 0.8, 0.8, 1.0 };
 GLfloat mat_specular[] = { 1, 1, 1, 1 };
 GLfloat mat_shininess[] = { 70.0 };
 GLfloat mat_emission[] = {0, 0, 0, 0};
 
 // Proprietes de la source lumineuse
 //
-GLfloat light_ambient[] = { 0.4, 0.4, 0.4, 0 };
-GLfloat light_diffuse[] = { 0.3, 0.3, 0.3, 0 };
+GLfloat light_ambient[] = { 0.8, 0.8, 0.8, 0 };
+GLfloat light_diffuse[] = { 0.7, 0.7, 0.7, 0 };
 GLfloat light_specular[] = { .9, .9,.9, 0 };
-GLfloat light_position[] = { -7.0, 2.0, 5.0, 1.0 };
-
+GLfloat light_position[] = { 0.0, 0.0, -3.0, 1.0 };
 // Proprietes generales de l'eclairage
 //
 GLfloat general_light_ambient[] = { 0.2, 0.2, 0.2, 1.0 };
@@ -113,7 +113,7 @@ void initTextures()
     glClearColor (0, 0, 0, 0);
     glEnable(GL_DEPTH_TEST);
 
-    solTexture=createTexture(SOL);
+
     defaultTexture = createTexture(DEFAULT);
     player1.texture = createTexture(player1.pathTexture);
     player2.texture = createTexture(player2.pathTexture);
@@ -179,13 +179,14 @@ void initFaces()
     currentFace = &faces[0];
 }
 
+
 void init(void)
 {
     initPlayers();
     initTextures();
     initFaces();
 
-    glClearColor (0.3, 0.3, 0.3, 0.0);
+    glClearColor (0.37, 0.43, 0.44, 0.0);
     glClear (GL_COLOR_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glLoadIdentity ();
@@ -342,108 +343,112 @@ void rotateMorpion(char *direction)
 void drawCube(GLuint texName)
 {
 
-    glPushMatrix();
     glTranslatef(-0.5, -0.5, -0.5);
     glBindTexture(GL_TEXTURE_2D, texName);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
     // devant
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0, 0.0, 0.0);
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f (0, 0, 0);
-    glNormal3f(1.0, 0.0, 0.0);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f (1, 0, 0);
-    glNormal3f(1.0, 1.0, 0.0);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f (1, 1, 0);
-    glNormal3f(0.0, 1.0, 0.0);
+        glBegin(GL_QUADS);
+
+    glNormal3f(0.0f, 0.0f, -2.7*ecartCube);
     glTexCoord2f(1.0, 0.0);
+    glVertex3f (0, 0, 0);
+
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (1, 0, 0);
+
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (1, 1, 0);
+
+    glTexCoord2f(1.0, 1.0);
     glVertex3f (0, 1, 0);
     glEnd();
 
     // arriere
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0, 0.0, 1.0);
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f (0, 0, 1);
-    glNormal3f(1.0, 0.0, 1.0);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f (1, 0, 1);
-    glNormal3f(1.0, 1.0, 1.0);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f (1, 1, 1);
-    glNormal3f(0.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+
+    glNormal3f(0.0f, 0.0f, 2.0f);
     glTexCoord2f(1.0, 0.0);
+    glVertex3f (0, 0, 1);
+
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (1, 0, 1);
+
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (1, 1, 1);
+
+    glTexCoord2f(1.0, 1.0);
     glVertex3f (0, 1, 1);
     glEnd();
 
     // gauche
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0, 0.0, 0.0);
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f (0, 0, 0);
-    glNormal3f(0.0, 0.0, 1.0);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f (0, 0, 1);
-    glNormal3f(0.0, 1.0, 1.0);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f (0, 1, 1);
-    glNormal3f(0.0, 1.0, 0.0);
+       glBegin(GL_QUADS);
+
+      glNormal3f(-2.0f, 0.0f, 0.0f);
     glTexCoord2f(1.0, 0.0);
+    glVertex3f (0, 0, 0);
+
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (0, 0, 1);
+
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (0, 1, 1);
+
+    glTexCoord2f(1.0, 1.0);
     glVertex3f (0, 1, 0);
     glEnd();
 
     //droite
-    glBegin(GL_POLYGON);
-    glNormal3f(1.0, 0.0, 0.0);
-    glTexCoord2f(0.0, 0.0);
-    glVertex3f (1, 0, 0);
-    glNormal3f(1.0, 0.0, 1.0);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3f (1, 0, 1);
-    glNormal3f(1.0, 1.0, 1.0);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3f (1, 1, 1);
-    glNormal3f(1.0, 1.0, 0.0);
+       glBegin(GL_QUADS);
+
+   glNormal3f(2.0f, 0.0f, 0.0f);
     glTexCoord2f(1.0, 0.0);
+    glVertex3f (1, 0, 0);
+
+    glTexCoord2f(0.0, 0.0);
+    glVertex3f (1, 0, 1);
+
+    glTexCoord2f(0.0, 1.0);
+    glVertex3f (1, 1, 1);
+
+    glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 1, 0);
     glEnd();
 
     //dessous
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0, 0.0, 0.0);
+       glBegin(GL_QUADS);
+
+     glNormal3f(0.0f, -1.0f, 0.0f);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 0, 0);
-    glNormal3f(0.0, 0.0, 1.0);
+
     glTexCoord2f(0.0, 1.0);
     glVertex3f (0, 0, 1);
-    glNormal3f(1.0, 0.0, 1.0);
+
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 0, 1);
-    glNormal3f(1.0, 0.0, 0.0);
+
     glTexCoord2f(1.0, 0.0);
     glVertex3f (1, 0, 0);
     glEnd();
 
     //dessus
-    glBegin(GL_POLYGON);
-    glNormal3f(0.0, 1.0, 0.0);
+        glBegin(GL_QUADS);
+
+    glNormal3f(0.0f, 2.0f, 0.0f);
     glTexCoord2f(0.0, 0.0);
     glVertex3f (0, 1, 0);
-    glNormal3f(0.0, 1.0, 1.0);
+
     glTexCoord2f(0.0, 1.0);
     glVertex3f (0, 1, 1);
-    glNormal3f(1.0, 1.0, 1.0);
+
     glTexCoord2f(1.0, 1.0);
     glVertex3f (1, 1, 1);
-    glNormal3f(1.0, 1.0, 0.0);
+
     glTexCoord2f(1.0, 0.0);
     glVertex3f (1, 1, 0);
     glEnd();
     glTranslatef(0.5, 0.5, 0.5);
-    glPopMatrix();
 }
 
 void drawMorpion()
@@ -509,21 +514,45 @@ void printText(int x, int y, char *string, void *font)
 void display(void)
 {
 
+
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glClear (GL_COLOR_BUFFER_BIT);
     glClear (GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
-    glEnable(GL_LIGHTING); 	// Active l'éclairage
-    glEnable(GL_LIGHT0); 	// Allume la lumière n°1
+   // glEnable(GL_DEPTH_TEST); 	// Active le test de profondeur
+  //  glEnable(GL_LIGHTING); 	// Active l'éclairage
+
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, general_light_ambient);
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+
+    glEnable(GL_LIGHTING);
+
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    glMaterialfv(GL_FRONT, GL_EMISSION, mat_emission);
+
 
 
     glPushMatrix();
+
     glRotatef(xrotate, 0.0, 1.0, 0.0);
     glTranslatef(ecartCube,-ecartCube,-ecartCube);
-    initLight();
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHT0);
     drawMorpion();
+    glDisable(GL_LIGHT0);
     glDisable(GL_TEXTURE_2D);
+
     glPopMatrix();
+
+    glDisable(GL_LIGHTING);
+
 
 
     glPushMatrix();
