@@ -25,6 +25,7 @@ Player* waintingPlayer;
 
 Face faces[4];
 Face* currentFace;
+int selectedCubeId;
 
 Cube cubes[3][3][3];
 Cube* selectedCube;
@@ -199,33 +200,52 @@ void init(void)
 *
 ***/
 
+void checkPlayWinOnFace(Face *face, int cubeId){
+    if(face->winner==NULL){
+        return;
+    }
+
+    Cube* colCubes[3] = { face->cubes[cubeId], face->cubes[(cubeId+3)%9], face->cubes[(cubeId+6)%9]};
+    Cube* lineCubes[3] = { face->cubes[cubeId], face->cubes[(cubeId+1)%4], face->cubes[(cubeId+6)%4]};
+
+
+}
+
+int checkPlayWin()
+{
+    checkPlayWinOnFace(currentFace, selectedCubeId);
+    if(selectedCubeId%3==0){
+        checkPlayWinOnFace(currentFace->leftFace, selectedCubeId+2);
+    }else if(selectedCubeId%3==2){
+        checkPlayWinOnFace(currentFace->rightFace, selectedCubeId-2);
+    }
+}
+
 void endTurn()
 {
-
+    checkPlayWin();
+    Player* isFinish = checkGameFinished();
     Player *tmp = currentPlayer;
     currentPlayer = waintingPlayer;
     waintingPlayer = tmp;
 }
 
-void testFaceFinished(Face face)
-{
-    // Si tous les cubes de la current face sont joués:
-    nbFinishedFaces = nbFinishedFaces + 1;
-}
-
-void testFaceWon(Face face)
-{
-    // si la face n a pas encore de winner , on regarde si il y a une combinaison gagnante.
-    // Si oui, on set le joueur actif comme winner, et on incremente les pts du joueur.
-}
-
-void testGameFinished()
+Player* checkGameFinished()
 {
     // Si players[0].pts == 3 && players[1].pts == 3    EGALITE
     // Si players[0].pts > players[1].pts   PLAYERS 1 GAGNE
     // Si players[0].pts < players[1].pts   PLAYERS 2 GAGNE
     // Si non Si nbFinishedFaces == 6 -> on regarde lequel a le plus de points
+    return NULL;
 }
+
+void checkFaceFinished(Face face)
+{
+    // Si tous les cubes de la current face sont joués ou un joueur l'a gagnée:
+    nbFinishedFaces = nbFinishedFaces + 1;
+}
+
+
 
 void select_timer(int v)
 {
@@ -250,10 +270,11 @@ void select_timer(int v)
 
 }
 
-void selectCube(Cube* cube)
+void selectCube(int cubeId)
 {
-    if(cube->player == NULL && selectedCube == NULL){
-        selectedCube = cube;
+    if(currentFace->cubes[cubeId]->player == NULL && selectedCube == NULL){
+        selectedCube = currentFace->cubes[cubeId];
+        selectedCubeId = cubeId;
         glutTimerFunc(50, select_timer, 1);
     }
 }
@@ -546,31 +567,31 @@ void keyboard(unsigned char key, int x, int y)
     switch (key)
     {
     case '1':
-        selectCube(currentFace->cubes[0]);
+        selectCube(0);
         break;
     case '2':
-        selectCube(currentFace->cubes[1]);
+        selectCube(1);
         break;
     case '3':
-        selectCube(currentFace->cubes[2]);
+        selectCube(2);
         break;
     case '4':
-        selectCube(currentFace->cubes[3]);
+        selectCube(3);
         break;
     case '5':
-        selectCube(currentFace->cubes[4]);
+        selectCube(4);
         break;
     case '6':
-        selectCube(currentFace->cubes[5]);
+        selectCube(5);
         break;
     case '7':
-        selectCube(currentFace->cubes[6]);
+        selectCube(6);
         break;
     case '8':
-        selectCube(currentFace->cubes[7]);
+        selectCube(7);
         break;
     case '9':
-        selectCube(currentFace->cubes[8]);
+        selectCube(8);
         break;
     case 27:
         exit(0);
